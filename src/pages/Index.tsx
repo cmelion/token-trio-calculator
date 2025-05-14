@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -85,10 +84,7 @@ const Index = () => {
   };
 
   const handleSourceValueChange = (newValue: string) => {
-    // Only allow numbers and decimals
-    if (newValue === "" || /^[0-9]*\.?[0-9]*$/.test(newValue)) {
-      setSourceValue(newValue);
-    }
+    setSourceValue(newValue);
   };
 
   return (
