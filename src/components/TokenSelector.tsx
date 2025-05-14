@@ -81,7 +81,7 @@ const TokenSelector = ({
                       <span className="text-xs text-muted-foreground">{token.name}</span>
                     </div>
                     <div className="ml-auto text-sm">
-                      ${token.price.toFixed(2)}
+                      ${token.price?.toFixed(2) ?? "0.00"}
                     </div>
                   </button>
                 ))

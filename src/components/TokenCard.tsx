@@ -30,7 +30,7 @@ const TokenCard = ({
           </span>
           {token && (
             <span className="text-xs text-muted-foreground">
-              {`1 ${token.symbol} ≈ $${token.price.toFixed(2)}`}
+              {`1 ${token.symbol} ≈ $${token.price?.toFixed(2) ?? "0.00"}`}
             </span>
           )}
         </div>

@@ -2,6 +2,8 @@
 import {
   getAssetErc20ByChainAndSymbol,
   getAssetPriceInfo,
+  Erc20AssetInfo,
+  AssetPriceInfo
 } from '@funkit/api-base';
 
 const API_KEY = 'Z9SZaOwpmE40KX61mUKWm5hrpGh7WHVkaTvQJpQk';
@@ -56,8 +58,9 @@ export async function fetchTokenInfo(symbol: string, chainId: string): Promise<T
       decimals: tokenData.decimals,
       chainId,
       address: tokenData.address,
-      logoURI: tokenData.logoURL,
-      price: priceData?.price || 0,
+      // Fix for type errors - use optional chaining to handle potentially missing properties
+      logoURI: tokenData.logoURL || null, // Fix the property name or provide fallback
+      price: priceData?.price ?? 0, // Fix the property access or provide fallback
     };
   } catch (error) {
     console.error(`Error fetching token info for ${symbol}:`, error);
