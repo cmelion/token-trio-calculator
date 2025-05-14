@@ -42,19 +42,17 @@ const TokenCard = ({
     if (!token || !value) return "";
 
     if (inputMode === "token") {
-      return value;
-    } else {
-      try {
-        // If in USD mode, convert token value to USD equivalent
-        const tokenAmount = parseFloat(value);
-        if (!isNaN(tokenAmount) && token.price) {
-          return (tokenAmount * token.price).toFixed(2);
+      // If we're in token mode, display the token amount
+      if (token.price && token.price > 0) {
+        const usdAmount = parseFloat(value);
+        if (!isNaN(usdAmount)) {
+          return (usdAmount / token.price).toFixed(6);
         }
-        return "";
-      } catch (error) {
-        console.error("Error calculating USD value:", error);
-        return "";
       }
+      return "";
+    } else {
+      // In USD mode, show the USD value directly
+      return value;
     }
   };
 
@@ -67,11 +65,13 @@ const TokenCard = ({
       if (isNaN(amount)) return "";
 
       if (inputMode === "token" && token.price) {
-        // Show USD value
-        return `≈ $${(amount * token.price).toFixed(2)}`;
+        // Show USD value when in token mode
+        const tokenAmount = parseFloat(displayValue());
+        return `≈ $${(tokenAmount * token.price).toFixed(2)}`;
       } else if (inputMode === "usd" && token.price && token.price > 0) {
-        // Show token amount
-        return `≈ ${(amount / token.price).toFixed(6)} ${token.symbol}`;
+        // Show token amount when in USD mode
+        const usdAmount = parseFloat(value);
+        return `≈ ${(usdAmount / token.price).toFixed(6)} ${token.symbol}`;
       }
       return "";
     } catch (error) {
@@ -102,7 +102,7 @@ const TokenCard = ({
               value={displayValue()}
               onChange={(e) => handleInputChange(e.target.value)}
               disabled={disabled}
-              className="text-4xl font-bold bg-transparent border-none h-16 p-0 pl-8 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-white/50"
+              className="text-5xl font-bold bg-transparent border-none h-16 p-0 pl-8 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-white/50"
             />
             <div className="absolute left-0 flex items-center">
               {inputMode === "usd" ? (

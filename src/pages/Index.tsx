@@ -22,15 +22,14 @@ const Index = () => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // Update target value when source value or tokens change
+  // Keep both values in sync when source value changes
   useEffect(() => {
     if (sourceToken && targetToken && sourceValue) {
       try {
         const sourceAmount = parseFloat(sourceValue);
         if (!isNaN(sourceAmount)) {
-          const sourceValueInUSD = sourceAmount * sourceToken.price;
-          const targetAmount = sourceValueInUSD / targetToken.price;
-          setTargetValue(targetAmount.toFixed(6));
+          const sourceValueInUSD = sourceAmount;
+          setTargetValue(sourceValueInUSD.toString());
         }
       } catch (error) {
         console.error("Error calculating swap:", error);
@@ -39,6 +38,13 @@ const Index = () => {
       setTargetValue("");
     }
   }, [sourceValue, sourceToken, targetToken]);
+
+  // Keep both values in sync when target value changes
+  useEffect(() => {
+    if (sourceToken && targetToken && targetValue && !sourceValue) {
+      setSourceValue(targetValue);
+    }
+  }, [targetValue, sourceToken, targetToken, sourceValue]);
 
   // Set initial tokens once loaded
   useEffect(() => {
@@ -85,6 +91,11 @@ const Index = () => {
 
   const handleSourceValueChange = (newValue: string) => {
     setSourceValue(newValue);
+  };
+
+  const handleTargetValueChange = (newValue: string) => {
+    setTargetValue(newValue);
+    setSourceValue(newValue); // Keep source and target in sync for USD values
   };
 
   return (
@@ -147,9 +158,8 @@ const Index = () => {
             <TokenCard
               token={targetToken}
               value={targetValue}
-              onChange={() => {}} // Read-only for now
+              onChange={handleTargetValueChange}
               onTokenSelect={handleTargetTokenSelect}
-              disabled
             />
           </div>
           
