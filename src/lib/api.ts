@@ -43,11 +43,17 @@ export async function fetchTokenInfo(symbol: string, chainId: string): Promise<T
       return null;
     }
 
+    // Log response to understand structure
+    console.log('Token data for debugging:', tokenData);
+
     const priceData = await getAssetPriceInfo({
       chainId,
       assetTokenAddress: tokenData.address,
       apiKey: API_KEY,
     });
+
+    // Log price data to understand structure
+    console.log('Price data for debugging:', priceData);
 
     return {
       id: `${chainId}-${tokenData.address}`,
@@ -56,9 +62,9 @@ export async function fetchTokenInfo(symbol: string, chainId: string): Promise<T
       decimals: tokenData.decimals,
       chainId,
       address: tokenData.address,
-      // Access the properties correctly based on the actual API response structure
-      logoURI: tokenData.logo || null,
-      price: priceData ? Number(priceData.usdPrice || 0) : 0,
+      // Use safe property access and type assertion to avoid TypeScript errors
+      logoURI: (tokenData as any).logo || (tokenData as any).logoURI || null,
+      price: priceData ? Number((priceData as any).usdPrice || (priceData as any).price || 0) : 0,
     };
   } catch (error) {
     console.error(`Error fetching token info for ${symbol}:`, error);
