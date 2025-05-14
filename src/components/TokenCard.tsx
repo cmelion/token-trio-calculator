@@ -104,7 +104,7 @@ const TokenCard = ({
               value={displayValue()}
               onChange={(e) => handleInputChange(e.target.value)}
               disabled={disabled}
-              className="text-5xl font-bold bg-transparent border-none h-16 p-0 pl-8 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-white/50"
+              className="text-5xl font-bold bg-transparent border-none h-16 p-0 pl-8 pr-24 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-white/50"
             />
             <div className="absolute left-0 flex items-center">
               {inputMode === "usd" ? (
@@ -128,7 +128,7 @@ const TokenCard = ({
             </div>
             <button
               onClick={onTokenSelect}
-              className="ml-auto flex items-center gap-2 px-3 py-2 bg-primary/20 hover:bg-primary/30 transition-colors rounded-md border border-primary/30"
+              className="absolute right-0 flex items-center gap-2 px-3 py-2 bg-primary/20 hover:bg-primary/30 transition-colors rounded-md border border-primary/30"
             >
               {token ? (
                 <>
