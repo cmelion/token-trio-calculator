@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { TokenInfo } from "@/lib/api";
 import { useState } from "react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ArrowDownUp } from "lucide-react";
 
 interface TokenCardProps {
   token: TokenInfo | null;
@@ -29,6 +29,11 @@ const TokenCard = ({
     if (newValue === "" || /^[0-9]*\.?[0-9]*$/.test(newValue)) {
       onChange(newValue);
     }
+  };
+
+  // Toggle between token and USD mode
+  const toggleInputMode = () => {
+    setInputMode(inputMode === "token" ? "usd" : "token");
   };
 
   // Format displayed value based on input mode
@@ -88,32 +93,6 @@ const TokenCard = ({
           )}
         </div>
         
-        {token && (
-          <div className="mb-3">
-            <ToggleGroup 
-              type="single" 
-              value={inputMode} 
-              onValueChange={(value) => {
-                if (value) setInputMode(value as "token" | "usd");
-              }}
-              className="w-full md:w-auto bg-black/30 rounded-full p-1 border border-primary/20"
-            >
-              <ToggleGroupItem 
-                value="token" 
-                className="flex-1 rounded-full text-sm font-medium data-[state=on]:bg-white data-[state=on]:text-black data-[state=off]:text-white/80"
-              >
-                {token.symbol}
-              </ToggleGroupItem>
-              <ToggleGroupItem 
-                value="usd" 
-                className="flex-1 rounded-full text-sm font-medium data-[state=on]:bg-white data-[state=on]:text-black data-[state=off]:text-white/80"
-              >
-                USD
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
-        )}
-        
         <div className="flex flex-col mb-2">
           <div className="relative flex items-center">
             <Input
@@ -122,14 +101,17 @@ const TokenCard = ({
               value={displayValue()}
               onChange={(e) => handleInputChange(e.target.value)}
               disabled={disabled}
-              className="text-3xl font-bold bg-transparent border-none h-14 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-white/50"
+              className={`text-3xl font-bold bg-transparent border-none h-14 p-0 ${inputMode === "usd" ? "pl-5" : "pl-0"} focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-white/50`}
             />
             {inputMode === "usd" && (
               <span className="absolute left-0 text-3xl font-bold text-white">$</span>
             )}
+            {inputMode === "token" && (
+              <span className="ml-2 text-3xl font-bold text-white">{token?.symbol || ""}</span>
+            )}
             <button
               onClick={onTokenSelect}
-              className="ml-2 flex items-center gap-2 px-3 py-2 bg-primary/20 hover:bg-primary/30 transition-colors rounded-md border border-primary/30"
+              className="ml-auto flex items-center gap-2 px-3 py-2 bg-primary/20 hover:bg-primary/30 transition-colors rounded-md border border-primary/30"
             >
               {token ? (
                 <>
@@ -154,11 +136,17 @@ const TokenCard = ({
             </button>
           </div>
 
-          {token && value && (
-            <div className="text-sm text-primary/80 font-medium mt-1">
-              {getSecondaryValue()}
+          <div className="flex items-center mt-2">
+            <button 
+              onClick={toggleInputMode}
+              className="flex items-center justify-center p-1 mr-2 rounded-full bg-primary/20 hover:bg-primary/30 transition-colors border border-primary/30"
+            >
+              <ArrowDownUp className="w-3 h-3 text-primary" />
+            </button>
+            <div className="text-sm text-primary/80 font-medium">
+              {token && value ? getSecondaryValue() : `≈ 0 ${inputMode === "token" ? "USD" : token?.symbol || ""}`}
             </div>
-          )}
+          </div>
         </div>
 
         <div className="mt-auto text-sm text-white/80">
