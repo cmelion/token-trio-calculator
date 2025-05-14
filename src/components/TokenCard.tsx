@@ -114,53 +114,52 @@ const TokenCard = ({
           </div>
         )}
         
-        <div className="flex items-center gap-2 mb-2">
-          <div className="relative flex-1">
+        <div className="flex flex-col mb-2">
+          <div className="relative flex items-center">
             <Input
               type="text"
               placeholder="0.0"
               value={displayValue()}
               onChange={(e) => handleInputChange(e.target.value)}
               disabled={disabled}
-              className="text-2xl font-bold bg-transparent border-none h-12 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-white/50"
+              className="text-3xl font-bold bg-transparent border-none h-14 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-white/50"
             />
             {inputMode === "usd" && (
-              <span className="absolute left-0 top-0 text-2xl font-bold text-white">$</span>
+              <span className="absolute left-0 text-3xl font-bold text-white">$</span>
             )}
+            <button
+              onClick={onTokenSelect}
+              className="ml-2 flex items-center gap-2 px-3 py-2 bg-primary/20 hover:bg-primary/30 transition-colors rounded-md border border-primary/30"
+            >
+              {token ? (
+                <>
+                  {token.logoURI && (
+                    <img 
+                      src={token.logoURI} 
+                      alt={token.name} 
+                      className="w-5 h-5 rounded-full" 
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "/placeholder.svg";
+                      }} 
+                    />
+                  )}
+                  <span className="font-medium text-white">{token.symbol}</span>
+                </>
+              ) : (
+                <span className="text-white">Select token</span>
+              )}
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </button>
           </div>
-          
-          <button
-            onClick={onTokenSelect}
-            className="flex items-center gap-2 px-3 py-2 bg-primary/20 hover:bg-primary/30 transition-colors rounded-md border border-primary/30"
-          >
-            {token ? (
-              <>
-                {token.logoURI && (
-                  <img 
-                    src={token.logoURI} 
-                    alt={token.name} 
-                    className="w-5 h-5 rounded-full" 
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "/placeholder.svg";
-                    }} 
-                  />
-                )}
-                <span className="font-medium text-white">{token.symbol}</span>
-              </>
-            ) : (
-              <span className="text-white">Select token</span>
-            )}
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-              <path d="m6 9 6 6 6-6"/>
-            </svg>
-          </button>
-        </div>
 
-        {token && value && (
-          <div className="text-sm text-primary/90 font-medium mt-1">
-            {getSecondaryValue()}
-          </div>
-        )}
+          {token && value && (
+            <div className="text-sm text-primary/80 font-medium mt-1">
+              {getSecondaryValue()}
+            </div>
+          )}
+        </div>
 
         <div className="mt-auto text-sm text-white/80">
           {token ? `Balance: 0.00 ${token.symbol}` : "Select a token"}
