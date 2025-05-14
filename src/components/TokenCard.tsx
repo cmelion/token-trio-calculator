@@ -104,23 +104,23 @@ const TokenCard = ({
               value={displayValue()}
               onChange={(e) => handleInputChange(e.target.value)}
               disabled={disabled}
-              className="text-5xl font-bold bg-transparent border-none h-16 p-0 pl-8 pr-24 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-white/50"
+              className="text-5xl font-bold bg-transparent border-none h-16 p-0 pl-8 pr-16 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-white/50 w-full"
             />
             <div className="absolute left-0 flex items-center">
               {inputMode === "usd" ? (
-                <DollarSign className="h-7 w-7 text-white" />
+                <DollarSign className="h-6 w-6 text-white" />
               ) : token ? (
                 token.logoURI ? (
                   <img 
                     src={token.logoURI} 
                     alt={token.symbol} 
-                    className="w-7 h-7 rounded-full" 
+                    className="w-6 h-6 rounded-full" 
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = "/placeholder.svg";
                     }}
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded-full bg-primary/30 flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-primary/30 flex items-center justify-center">
                     <span className="text-white text-xs font-bold">{token.symbol[0]}</span>
                   </div>
                 )
@@ -128,7 +128,7 @@ const TokenCard = ({
             </div>
             <button
               onClick={onTokenSelect}
-              className="absolute right-0 flex items-center gap-2 px-3 py-2 bg-primary/20 hover:bg-primary/30 transition-colors rounded-md border border-primary/30"
+              className="absolute right-0 flex items-center gap-1 px-2 py-1.5 bg-primary/20 hover:bg-primary/30 transition-colors rounded-md border border-primary/30 text-sm"
             >
               {token ? (
                 <>
@@ -136,7 +136,7 @@ const TokenCard = ({
                     <img 
                       src={token.logoURI} 
                       alt={token.name} 
-                      className="w-5 h-5 rounded-full" 
+                      className="w-4 h-4 rounded-full" 
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/placeholder.svg";
                       }} 
@@ -147,7 +147,7 @@ const TokenCard = ({
               ) : (
                 <span className="text-white">Select token</span>
               )}
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                 <path d="m6 9 6 6 6-6"/>
               </svg>
             </button>

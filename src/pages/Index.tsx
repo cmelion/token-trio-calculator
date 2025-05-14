@@ -130,7 +130,7 @@ const Index = () => {
     <div className="min-h-screen flex flex-col items-center justify-center p-4 animate-fade-in">
       <Toaster position="top-center" />
       
-      <div className="w-full max-w-lg mx-auto">
+      <div className="w-full max-w-2xl mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent pb-2 drop-shadow-sm">
             Token Price Explorer
