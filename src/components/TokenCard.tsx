@@ -42,7 +42,7 @@ const TokenCard = ({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             disabled={disabled}
-            className="text-xl font-medium bg-transparent border-none h-12 p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="text-xl font-medium bg-transparent border-none h-12 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-white"
           />
           
           <button
