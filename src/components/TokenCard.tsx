@@ -8,7 +8,7 @@ import { ArrowDownUp, DollarSign } from "lucide-react";
 interface TokenCardProps {
   token: TokenInfo | null;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string, isUsdValue: boolean) => void;
   onTokenSelect: () => void;
   isSource?: boolean;
   disabled?: boolean;
@@ -28,7 +28,7 @@ const TokenCard = ({
   const handleInputChange = (newValue: string) => {
     // Only allow numbers and decimals
     if (newValue === "" || /^[0-9]*\.?[0-9]*$/.test(newValue)) {
-      onChange(newValue);
+      onChange(newValue, inputMode === "usd");
     }
   };
 
@@ -41,18 +41,21 @@ const TokenCard = ({
   const displayValue = () => {
     if (!token || !value) return "";
 
-    if (inputMode === "token") {
-      // If we're in token mode, display the token amount
-      if (token.price && token.price > 0) {
+    try {
+      if (inputMode === "token") {
+        // If we're in token mode, convert USD to token amount
         const usdAmount = parseFloat(value);
-        if (!isNaN(usdAmount)) {
+        if (!isNaN(usdAmount) && token.price && token.price > 0) {
           return (usdAmount / token.price).toFixed(6);
         }
+        return "";
+      } else {
+        // In USD mode, show the USD value directly
+        return value;
       }
+    } catch (error) {
+      console.error("Error calculating display value:", error);
       return "";
-    } else {
-      // In USD mode, show the USD value directly
-      return value;
     }
   };
 
@@ -61,16 +64,15 @@ const TokenCard = ({
     if (!token || !value) return "";
 
     try {
-      const amount = parseFloat(value);
-      if (isNaN(amount)) return "";
-
-      if (inputMode === "token" && token.price) {
+      if (inputMode === "token") {
         // Show USD value when in token mode
         const tokenAmount = parseFloat(displayValue());
+        if (isNaN(tokenAmount)) return "";
         return `≈ $${(tokenAmount * token.price).toFixed(2)}`;
-      } else if (inputMode === "usd" && token.price && token.price > 0) {
+      } else if (inputMode === "usd") {
         // Show token amount when in USD mode
         const usdAmount = parseFloat(value);
+        if (isNaN(usdAmount) || token.price <= 0) return "";
         return `≈ ${(usdAmount / token.price).toFixed(6)} ${token.symbol}`;
       }
       return "";
@@ -159,7 +161,7 @@ const TokenCard = ({
               <ArrowDownUp className="w-3 h-3 text-primary" />
             </button>
             <div className="text-sm text-primary/80 font-medium">
-              {token && value ? getSecondaryValue() : `≈ 0 ${inputMode === "token" ? "USD" : token?.symbol || ""}`}
+              {getSecondaryValue() || `≈ 0 ${inputMode === "token" ? "USD" : token?.symbol || ""}`}
             </div>
           </div>
         </div>

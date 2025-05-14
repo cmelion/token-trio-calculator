@@ -22,14 +22,13 @@ const Index = () => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // Keep both values in sync when source value changes
+  // Sync values when source value changes or tokens change
   useEffect(() => {
     if (sourceToken && targetToken && sourceValue) {
       try {
-        const sourceAmount = parseFloat(sourceValue);
-        if (!isNaN(sourceAmount)) {
-          const sourceValueInUSD = sourceAmount;
-          setTargetValue(sourceValueInUSD.toString());
+        const sourceUsdAmount = parseFloat(sourceValue);
+        if (!isNaN(sourceUsdAmount)) {
+          setTargetValue(sourceUsdAmount.toString());
         }
       } catch (error) {
         console.error("Error calculating swap:", error);
@@ -38,13 +37,6 @@ const Index = () => {
       setTargetValue("");
     }
   }, [sourceValue, sourceToken, targetToken]);
-
-  // Keep both values in sync when target value changes
-  useEffect(() => {
-    if (sourceToken && targetToken && targetValue && !sourceValue) {
-      setSourceValue(targetValue);
-    }
-  }, [targetValue, sourceToken, targetToken, sourceValue]);
 
   // Set initial tokens once loaded
   useEffect(() => {
@@ -59,6 +51,7 @@ const Index = () => {
     }
   }, [tokens, sourceToken, targetToken]);
 
+  // Handle token selection
   const handleSourceTokenSelect = () => {
     setIsSelectingSource(true);
   };
@@ -89,13 +82,48 @@ const Index = () => {
     }
   };
 
-  const handleSourceValueChange = (newValue: string) => {
-    setSourceValue(newValue);
+  // Handle value changes from either panel
+  const handleSourceValueChange = (newValue: string, isUsdValue: boolean) => {
+    if (isUsdValue) {
+      // Direct USD value
+      setSourceValue(newValue);
+    } else if (sourceToken) {
+      // Convert from token to USD
+      try {
+        const tokenAmount = parseFloat(newValue);
+        if (!isNaN(tokenAmount)) {
+          const usdValue = (tokenAmount * sourceToken.price).toFixed(2);
+          setSourceValue(usdValue);
+        } else {
+          setSourceValue("");
+        }
+      } catch (error) {
+        console.error("Error converting source value:", error);
+      }
+    }
   };
 
-  const handleTargetValueChange = (newValue: string) => {
-    setTargetValue(newValue);
-    setSourceValue(newValue); // Keep source and target in sync for USD values
+  const handleTargetValueChange = (newValue: string, isUsdValue: boolean) => {
+    if (isUsdValue) {
+      // Direct USD value
+      setTargetValue(newValue);
+      setSourceValue(newValue); // Keep USD values in sync
+    } else if (targetToken) {
+      // Convert from token to USD
+      try {
+        const tokenAmount = parseFloat(newValue);
+        if (!isNaN(tokenAmount)) {
+          const usdValue = (tokenAmount * targetToken.price).toFixed(2);
+          setTargetValue(usdValue);
+          setSourceValue(usdValue); // Keep USD values in sync
+        } else {
+          setTargetValue("");
+          setSourceValue("");
+        }
+      } catch (error) {
+        console.error("Error converting target value:", error);
+      }
+    }
   };
 
   return (

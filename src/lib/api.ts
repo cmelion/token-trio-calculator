@@ -30,6 +30,14 @@ export const supportedTokens = [
   { symbol: 'WBTC', name: 'Wrapped Bitcoin', chainId: CHAIN_IDS.ETHEREUM },
 ];
 
+// Fixed token prices as requested
+const fixedPrices = {
+  'USDC': 0.99,
+  'USDT': 1.02,
+  'ETH': 2700,
+  'WBTC': 104000
+};
+
 export async function fetchTokenInfo(symbol: string, chainId: string): Promise<TokenInfo | null> {
   try {
     const tokenData = await getAssetErc20ByChainAndSymbol({
@@ -46,6 +54,10 @@ export async function fetchTokenInfo(symbol: string, chainId: string): Promise<T
     // Log response to understand structure
     console.log('Token data for debugging:', tokenData);
 
+    // Use fixed prices instead of API prices
+    const fixedPrice = fixedPrices[symbol] || 1;
+    
+    // We still make the API call for completeness but use our fixed prices
     const priceData = await getAssetPriceInfo({
       chainId,
       assetTokenAddress: tokenData.address,
@@ -64,7 +76,7 @@ export async function fetchTokenInfo(symbol: string, chainId: string): Promise<T
       address: tokenData.address,
       // Use safe property access and type assertion to avoid TypeScript errors
       logoURI: (tokenData as any).logo || (tokenData as any).logoURI || null,
-      price: priceData ? Number((priceData as any).usdPrice || (priceData as any).price || 0) : 0,
+      price: fixedPrice, // Use our fixed price instead
     };
   } catch (error) {
     console.error(`Error fetching token info for ${symbol}:`, error);
