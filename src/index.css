@@ -73,7 +73,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    background: linear-gradient(to bottom right, #1a103c, #2d1b69);
+    background: linear-gradient(135deg, #1a103c 0%, #2d1b69 50%, #3b2483 100%);
     min-height: 100vh;
   }
 
@@ -86,11 +86,40 @@
   }
   
   ::-webkit-scrollbar-thumb {
-    background: #4c3a8f;
+    background: #6e4acf;
     border-radius: 4px;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    background: #6e59a5;
+    background: #8b6fe3;
+  }
+}
+
+@layer utilities {
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.4s ease-out forwards;
+  }
+
+  .glass-effect {
+    @apply backdrop-blur-lg bg-white/10 border border-white/20;
+  }
+
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
   }
 }

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -91,26 +92,31 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 animate-fade-in">
       <Toaster position="top-center" />
       
       <div className="w-full max-w-lg mx-auto">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent pb-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent pb-2 drop-shadow-sm">
             Token Price Explorer
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-white text-opacity-90 font-medium">
             Compare token values and explore potential swaps
           </p>
         </div>
         
-        <div className="bg-black/30 backdrop-blur-xl rounded-xl border border-muted/20 p-6 shadow-lg">
+        <div className="bg-black/50 backdrop-blur-xl rounded-xl border border-primary/30 p-6 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-300">
           <div className="grid grid-cols-4 gap-2 mb-6">
             {tokens.slice(0, 4).map((token) => (
               <Button
                 key={token.id}
-                variant={sourceToken?.id === token.id || targetToken?.id === token.id ? "secondary" : "outline"}
-                className="bg-muted/20 hover:bg-muted/40 border-muted/30"
+                variant={sourceToken?.id === token.id || targetToken?.id === token.id ? "default" : "outline"}
+                className={`
+                  ${sourceToken?.id === token.id || targetToken?.id === token.id 
+                    ? "bg-primary text-white hover:bg-primary/90" 
+                    : "bg-black/30 hover:bg-primary/20 border-primary/30 text-white"}
+                  transition-all duration-200 font-medium
+                `}
                 onClick={() => {
                   if (sourceToken?.id === token.id) {
                     // If already selected as source, do nothing
@@ -151,19 +157,19 @@ const Index = () => {
             />
           </div>
           
-          <div className="flex justify-between text-sm text-muted-foreground px-2">
-            <span>Exchange Rate:</span>
+          <div className="flex justify-between text-sm px-2">
+            <span className="text-white font-medium">Exchange Rate:</span>
             {sourceToken && targetToken ? (
-              <span>
+              <span className="text-primary/90 font-bold">
                 1 {sourceToken.symbol} ≈ {(sourceToken.price / targetToken.price).toFixed(6)} {targetToken.symbol} (${sourceToken.price.toFixed(2)})
               </span>
             ) : (
-              <span>Select tokens</span>
+              <span className="text-white/70">Select tokens</span>
             )}
           </div>
         </div>
         
-        <div className="mt-6 text-center text-xs text-muted-foreground">
+        <div className="mt-6 text-center text-xs text-white/70">
           <p>Data provided by @funkit/api-base • Chain ID: {sourceToken?.chainId || "1"}</p>
         </div>
       </div>

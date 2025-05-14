@@ -1,5 +1,4 @@
 
-import { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { TokenInfo } from "@/lib/api";
@@ -22,14 +21,14 @@ const TokenCard = ({
   disabled = false
 }: TokenCardProps) => {
   return (
-    <Card className="w-full h-[180px] shadow-lg border-2 border-muted/20 bg-black/20 backdrop-blur-md">
+    <Card className="w-full h-[180px] shadow-xl border border-primary/30 bg-black/40 backdrop-blur-md hover:shadow-primary/10 hover:border-primary/50 transition-all duration-200">
       <CardContent className="flex flex-col h-full p-4">
         <div className="flex justify-between mb-2">
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm font-medium text-white">
             {isSource ? "You pay" : "You receive"}
           </span>
           {token && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-primary/80 font-semibold">
               {`1 ${token.symbol} ≈ $${token.price?.toFixed(2) ?? "0.00"}`}
             </span>
           )}
@@ -42,12 +41,12 @@ const TokenCard = ({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             disabled={disabled}
-            className="text-xl font-medium bg-transparent border-none h-12 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-white"
+            className="text-xl font-bold bg-transparent border-none h-12 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-white/50"
           />
           
           <button
             onClick={onTokenSelect}
-            className="flex items-center gap-2 px-3 py-2 bg-muted/30 hover:bg-muted/50 transition-colors rounded-md"
+            className="flex items-center gap-2 px-3 py-2 bg-primary/20 hover:bg-primary/30 transition-colors rounded-md border border-primary/30"
           >
             {token ? (
               <>
@@ -61,18 +60,18 @@ const TokenCard = ({
                     }} 
                   />
                 )}
-                <span className="font-medium">{token.symbol}</span>
+                <span className="font-medium text-white">{token.symbol}</span>
               </>
             ) : (
-              <span>Select token</span>
+              <span className="text-white">Select token</span>
             )}
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
               <path d="m6 9 6 6 6-6"/>
             </svg>
           </button>
         </div>
 
-        <div className="mt-auto text-sm text-muted-foreground">
+        <div className="mt-auto text-sm text-white/80">
           {token ? `Balance: ${token.symbol}` : "Select a token"}
         </div>
       </CardContent>
