@@ -45,7 +45,7 @@ const TokenSelector = ({
             placeholder="Search by name or symbol"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="mb-4"
+            className="mb-4 text-white"
           />
           
           <ScrollArea className="h-[300px] rounded-md border border-muted/30 p-2">
