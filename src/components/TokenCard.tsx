@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { TokenInfo } from "@/lib/api";
 import { useState } from "react";
-import { ArrowDownUp } from "lucide-react";
+import { ArrowDownUp, DollarSign } from "lucide-react";
 
 interface TokenCardProps {
   token: TokenInfo | null;
@@ -22,7 +22,8 @@ const TokenCard = ({
   isSource = false,
   disabled = false
 }: TokenCardProps) => {
-  const [inputMode, setInputMode] = useState<"token" | "usd">("token");
+  // Default to USD mode
+  const [inputMode, setInputMode] = useState<"token" | "usd">("usd");
 
   const handleInputChange = (newValue: string) => {
     // Only allow numbers and decimals
@@ -101,14 +102,34 @@ const TokenCard = ({
               value={displayValue()}
               onChange={(e) => handleInputChange(e.target.value)}
               disabled={disabled}
-              className={`text-3xl font-bold bg-transparent border-none h-14 p-0 ${inputMode === "usd" ? "pl-5" : "pl-0"} focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-white/50`}
+              className={`text-4xl font-bold bg-transparent border-none h-16 p-0 ${inputMode === "usd" ? "pl-8" : "pl-0"} focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-white/50`}
             />
             {inputMode === "usd" && (
-              <span className="absolute left-0 text-3xl font-bold text-white">$</span>
+              <span className="absolute left-0 text-4xl font-bold text-white">
+                <DollarSign className="h-7 w-7" />
+              </span>
             )}
-            {inputMode === "token" && (
-              <span className="ml-2 text-3xl font-bold text-white">{token?.symbol || ""}</span>
+            {inputMode === "token" && token && (
+              <div className="absolute left-0 flex items-center">
+                {token.logoURI ? (
+                  <img 
+                    src={token.logoURI} 
+                    alt={token.symbol} 
+                    className="w-7 h-7 rounded-full" 
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/placeholder.svg";
+                    }}
+                  />
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-primary/30 flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">{token.symbol[0]}</span>
+                  </div>
+                )}
+              </div>
             )}
+            <span className="ml-2 text-4xl font-bold text-white">
+              {inputMode === "token" ? token?.symbol || "" : ""}
+            </span>
             <button
               onClick={onTokenSelect}
               className="ml-auto flex items-center gap-2 px-3 py-2 bg-primary/20 hover:bg-primary/30 transition-colors rounded-md border border-primary/30"
