@@ -83,7 +83,7 @@ const TokenCard = ({
   };
 
   return (
-    <Card className="w-[90%] h-[187px] mx-auto shadow-xl border border-primary/30 bg-black/40 backdrop-blur-md hover:shadow-primary/10 hover:border-primary/50 transition-all duration-200">
+    <Card className="w-full md:w-[90%] h-[187px] mx-auto shadow-xl border border-primary/30 bg-black/40 backdrop-blur-md hover:shadow-primary/10 hover:border-primary/50 transition-all duration-200">
       <CardContent className="flex flex-col h-full p-3">
         <div className="flex justify-between mb-1">
           <span className="text-sm font-medium text-white">
@@ -104,7 +104,7 @@ const TokenCard = ({
               value={displayValue()}
               onChange={(e) => handleInputChange(e.target.value)}
               disabled={disabled}
-              className="text-4xl font-bold bg-transparent border-none h-14 p-0 pl-7 pr-22 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-white/50 w-full"
+              className="text-3xl md:text-4xl font-bold bg-transparent border-none h-14 p-0 pl-7 pr-22 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-white/50 w-full"
             />
             <div className="absolute left-0 flex items-center">
               {inputMode === "usd" ? (
@@ -153,10 +153,10 @@ const TokenCard = ({
             </button>
           </div>
 
-          <div className="flex items-center mt-0">
+          <div className="flex items-center mt-0 gap-1">
             <button 
               onClick={toggleInputMode}
-              className="flex items-center justify-center p-1 mr-1 rounded-full bg-primary/20 hover:bg-primary/30 transition-colors border border-primary/30"
+              className="flex items-center justify-center p-1 mr-0.5 rounded-full bg-primary/20 hover:bg-primary/30 transition-colors border border-primary/30"
             >
               <ArrowDownUp className="w-3 h-3 text-primary" />
             </button>

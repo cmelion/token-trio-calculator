@@ -36,7 +36,7 @@ const TokenSelector = ({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-md bg-black/70 backdrop-blur-xl border border-primary/30 shadow-lg shadow-primary/20">
+      <DialogContent className="w-[90vw] max-w-md mx-auto sm:max-w-md bg-black/70 backdrop-blur-xl border border-primary/30 shadow-lg shadow-primary/20">
         <DialogHeader>
           <DialogTitle className="text-xl text-white font-bold">Select a token</DialogTitle>
         </DialogHeader>
@@ -48,7 +48,7 @@ const TokenSelector = ({
             className="mb-4 bg-white/10 border-primary/30 text-white"
           />
           
-          <ScrollArea className="h-[300px] rounded-md border border-primary/30 p-2">
+          <ScrollArea className="h-[50vh] sm:h-[300px] rounded-md border border-primary/30 p-2">
             <div className="space-y-1 pr-2">
               {filteredTokens.length > 0 ? (
                 filteredTokens.map((token) => (

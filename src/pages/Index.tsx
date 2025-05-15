@@ -141,7 +141,7 @@ const Index = () => {
         </div>
         
         <div className="bg-black/50 backdrop-blur-xl rounded-xl border border-primary/30 p-6 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-300">
-          <div className="grid grid-cols-4 gap-2 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
             {tokens.slice(0, 4).map((token) => (
               <Button
                 key={token.id}
@@ -172,7 +172,7 @@ const Index = () => {
             ))}
           </div>
           
-          <div className="flex items-center justify-center space-x-4 mb-6">
+          <div className="flex flex-col md:flex-row items-center justify-center md:space-x-4 space-y-4 md:space-y-0 mb-6">
             <TokenCard
               token={sourceToken}
               value={sourceValue}
@@ -181,7 +181,9 @@ const Index = () => {
               isSource
             />
             
-            <SwapArrow />
+            <div className="transform rotate-90 md:rotate-0">
+              <SwapArrow />
+            </div>
             
             <TokenCard
               token={targetToken}
