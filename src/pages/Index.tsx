@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Toaster } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button, type ButtonProps } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import TokenCard from "@/components/TokenCard";
 import TokenSelector from "@/components/TokenSelector";
@@ -17,7 +17,7 @@ const Index = () => {
   const [isSelectingTarget, setIsSelectingTarget] = useState<boolean>(false);
 
   // Fetch token data
-  const { data: tokens = [], isLoading } = useQuery({
+  const { data: tokens = []} = useQuery({
     queryKey: ["tokens"],
     queryFn: fetchAllSupportedTokens,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -130,9 +130,9 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 animate-fade-in">
       <Toaster position="top-center" />
-      
-      <div className="w-full max-w-2xl mx-auto">
-        <div className="mb-8 text-center">
+
+      <div className="w-full max-w-3xl lg:max-w-5xl mx-auto">
+      <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent pb-2 drop-shadow-sm">
             Token Price Explorer
           </h1>
@@ -146,7 +146,7 @@ const Index = () => {
             {tokens.slice(0, 4).map((token) => (
               <Button
                 key={token.id}
-                variant={sourceToken?.id === token.id || targetToken?.id === token.id ? "default" : "outline"}
+                variant={(sourceToken?.id === token.id || targetToken?.id === token.id ? "default" : "outline") as ButtonProps["variant"]}
                 className={`
                   ${sourceToken?.id === token.id || targetToken?.id === token.id 
                     ? "bg-primary text-white hover:bg-primary/90" 

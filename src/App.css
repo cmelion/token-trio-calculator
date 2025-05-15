@@ -40,3 +40,12 @@
 .read-the-docs {
   color: #888;
 }
+
+@media (min-width: 1024px) {
+  .token-container {
+    max-width: 600px;
+    padding: 2rem;
+    margin: 0 auto;
+  }
+}
+

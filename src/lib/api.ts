@@ -17,6 +17,23 @@ export interface TokenInfo {
   price: number;
 }
 
+interface TokenApiResponse {
+  name: string;
+  symbol: string;
+  decimals: number;
+  address: string;
+  logo?: string;
+  logoURI?: string;
+}
+
+interface PriceApiResponse {
+  unitPrice?: number;
+  amount?: number;
+  total?: number;
+  usdPrice?: number;  // Keep for backward compatibility
+  price?: number;     // Keep for backward compatibility
+}
+
 const CHAIN_IDS = {
   ETHEREUM: '1',
   POLYGON: '137',
@@ -30,42 +47,31 @@ export const supportedTokens = [
   { symbol: 'WBTC', name: 'Wrapped Bitcoin', chainId: CHAIN_IDS.ETHEREUM },
 ];
 
-// Fixed token prices as requested
-const fixedPrices = {
-  'USDC': 0.99,
-  'USDT': 1.02,
-  'ETH': 2700,
-  'WBTC': 104000
-};
-
 export async function fetchTokenInfo(symbol: string, chainId: string): Promise<TokenInfo | null> {
   try {
     const tokenData = await getAssetErc20ByChainAndSymbol({
       chainId,
       symbol,
       apiKey: API_KEY,
-    });
+    }) as TokenApiResponse;
 
     if (!tokenData) {
       console.error(`No token data found for ${symbol}`);
       return null;
     }
 
-    // Log response to understand structure
     console.log('Token data for debugging:', tokenData);
 
-    // Use fixed prices instead of API prices
-    const fixedPrice = fixedPrices[symbol] || 1;
-    
-    // We still make the API call for completeness but use our fixed prices
     const priceData = await getAssetPriceInfo({
       chainId,
       assetTokenAddress: tokenData.address,
       apiKey: API_KEY,
-    });
+    }) as PriceApiResponse;
 
-    // Log price data to understand structure
     console.log('Price data for debugging:', priceData);
+
+    // Only use the API price, with fallback to 1 if no price is available
+    const tokenPrice = priceData?.unitPrice || priceData?.usdPrice || priceData?.price || 1;
 
     return {
       id: `${chainId}-${tokenData.address}`,
@@ -74,9 +80,8 @@ export async function fetchTokenInfo(symbol: string, chainId: string): Promise<T
       decimals: tokenData.decimals,
       chainId,
       address: tokenData.address,
-      // Use safe property access and type assertion to avoid TypeScript errors
-      logoURI: (tokenData as any).logo || (tokenData as any).logoURI || null,
-      price: fixedPrice, // Use our fixed price instead
+      logoURI: tokenData.logo || tokenData.logoURI || null,
+      price: tokenPrice,
     };
   } catch (error) {
     console.error(`Error fetching token info for ${symbol}:`, error);
