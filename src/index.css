@@ -136,7 +136,7 @@
   .glass-effect {
     @apply backdrop-blur-lg border;
     @apply dark:bg-white/10 dark:border-white/20;
-    @apply light:bg-white/60 light:border-white/40;
+    @apply bg-white/60 border-white/40;
   }
 
   .text-shadow {
@@ -151,6 +151,6 @@
   .theme-card {
     @apply transition-colors duration-300;
     @apply dark:bg-black/50 dark:backdrop-blur-xl dark:border-primary/30 dark:shadow-lg dark:shadow-primary/20 dark:hover:shadow-primary/30;
-    @apply light:bg-white/70 light:backdrop-blur-xl light:border-primary/10 light:shadow-lg light:shadow-primary/10 light:hover:shadow-primary/20;
+    @apply bg-white/70 backdrop-blur-xl border-primary/10 shadow-lg shadow-primary/10 hover:shadow-primary/20;
   }
 }
