@@ -16,14 +16,17 @@ const getThemePreference = () => {
 document.documentElement.classList.add(getThemePreference());
 document.body.classList.add(getThemePreference());
 
-// Prepare the application environment, including MSW in development
+// Prepare the application environment, including MSW in development or when enabled in production
 async function prepare() {
-  // Only initialize MSW in development mode
   if (import.meta.env.DEV) {
     const { worker } = await import('./mocks/browser');
     return worker.start({
-      onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
+      onUnhandledRequest: 'bypass',
     });
+  } else if (import.meta.env.VITE_ENABLE_MSW === 'true') {
+    // Use the startMSW function in production when enabled
+    const { startMSW } = await import('./mocks/browser');
+    return startMSW();
   }
   return Promise.resolve();
 }
