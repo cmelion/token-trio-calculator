@@ -71,3 +71,27 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Environment Variables
+
+This project requires API keys that should not be committed to the repository.
+
+### Local Development
+
+1. Create a `.env` file in the project root directory
+2. Add your API key to the file in the following format:
+    ```env
+    VITE_API_KEY=your_api_key_here
+    ```
+3. Make sure `.env` is included in your `.gitignore` file to prevent accidentally committing sensitive information
+4. Start your development server with `npm run dev`
+5. The application will automatically load environment variables from the `.env` file
+
+### Running Tests
+
+When running tests that require API access:
+
+1. Create a `.env.test` file with your test environment variables
+2. Tests will use these variables when running in test mode
+
+Note: Never commit actual API keys to your repository.
