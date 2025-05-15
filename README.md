@@ -1,54 +1,5 @@
-# Welcome to your Lovable project
+# Welcome to our Fun Token Price Explorer project
 
-## Project info
-
-**URL**: https://lovable.dev/projects/171acc13-4223-4a9c-979d-bfa0c71df173
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/171acc13-4223-4a9c-979d-bfa0c71df173) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
 
 ## What technologies are used for this project?
 
@@ -60,17 +11,24 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+For this demo project, we intentionally chose simple and well-understood mechanisms:
 
-Simply open [Lovable](https://lovable.dev/projects/171acc13-4223-4a9c-979d-bfa0c71df173) and click on Share -> Publish.
+- **State Management**: React Context along with local useState for the minimal state we needed to manage
+- **API Handling**: React Query for efficient data fetching, caching, and state synchronization
 
-## Can I connect a custom domain to my Lovable project?
+If operating within a larger ecosystem, we would adopt in-place mechanisms, such as:
+- Redux or Zustand for more complex state management needs
+- GraphQL solutions like Apollo that support both traditional REST endpoints and more robust solutions for the crypto space like TheGraph
 
-Yes, you can!
+We've added robust testing to facilitate migration to more robust tech stacks. This approach ensures that behavior and user experience would encounter little or no changes during migration, as our MSW (Mock Service Worker) mocking framework can be configured to support different methods for accessing APIs.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Notable Features
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- Token selection interface with price display
+- Real-time conversion between USD and token values
+- Balance validation for source tokens
+- Responsive design for various screen sizes
+- Toggle between token and USD input modes
 
 ## Environment Variables
 
