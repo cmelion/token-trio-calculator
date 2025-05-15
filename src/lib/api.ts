@@ -4,7 +4,8 @@ import {
   getAssetPriceInfo
 } from '@funkit/api-base';
 
-const API_KEY = 'Z9SZaOwpmE40KX61mUKWm5hrpGh7WHVkaTvQJpQk';
+// Replace hardcoded API key with environment variable
+const API_KEY = import.meta.env.VITE_API_KEY || 'Z9SZaOwpmE40KX61mUKWm5hrpGh7WHVkaTvQJpQk';
 
 export interface TokenInfo {
   id: string;
