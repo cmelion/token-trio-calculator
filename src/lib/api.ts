@@ -41,6 +41,7 @@ const CHAIN_IDS = {
   BASE: '8453'
 };
 
+// Limited set of supported tokens for demonstration purposes
 export const supportedTokens = [
   { symbol: 'USDC', name: 'USD Coin', chainId: CHAIN_IDS.ETHEREUM },
   { symbol: 'USDT', name: 'Tether', chainId: CHAIN_IDS.ETHEREUM },
