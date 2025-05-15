@@ -5,7 +5,7 @@ import {
 } from '@funkit/api-base';
 
 // Replace hardcoded API key with environment variable
-const API_KEY = import.meta.env.VITE_API_KEY || 'Z9SZaOwpmE40KX61mUKWm5hrpGh7WHVkaTvQJpQk';
+const API_KEY = import.meta.env.VITE_API_KEY;
 
 export interface TokenInfo {
   id: string;
