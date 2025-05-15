@@ -133,15 +133,15 @@ const Index = () => {
 
       <div className="w-full max-w-3xl lg:max-w-5xl mx-auto">
       <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent pb-2 drop-shadow-sm">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent pb-2 drop-shadow-sm">
             Token Price Explorer
           </h1>
-          <p className="text-white text-opacity-90 font-medium">
+          <p className="text-foreground/90 font-medium">
             Compare token values and explore potential swaps
           </p>
         </div>
         
-        <div className="bg-black/50 backdrop-blur-xl rounded-xl border border-primary/30 p-6 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-300">
+        <div className="theme-card rounded-xl p-6 transition-all duration-300">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
             {tokens.slice(0, 4).map((token) => (
               <Button
@@ -149,8 +149,8 @@ const Index = () => {
                 variant={(sourceToken?.id === token.id || targetToken?.id === token.id ? "default" : "outline") as ButtonProps["variant"]}
                 className={`
                   ${sourceToken?.id === token.id || targetToken?.id === token.id 
-                    ? "bg-primary text-white hover:bg-primary/90" 
-                    : "bg-black/30 hover:bg-primary/20 border-primary/30 text-white"}
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                    : "bg-accent/20 hover:bg-primary/20 border-primary/30 text-foreground"}
                   transition-all duration-200 font-medium
                 `}
                 onClick={() => {
@@ -196,18 +196,18 @@ const Index = () => {
           </div>
           
           <div className="flex justify-between text-sm px-2">
-            <span className="text-white font-medium">Exchange Rate:</span>
+            <span className="text-foreground font-medium">Exchange Rate:</span>
             {sourceToken && targetToken ? (
-              <span className="text-primary/90 font-bold">
+              <span className="text-primary font-bold">
                 1 {sourceToken.symbol} ≈ {(sourceToken.price / targetToken.price).toFixed(6)} {targetToken.symbol} (${sourceToken.price.toFixed(2)})
               </span>
             ) : (
-              <span className="text-white/70">Select tokens</span>
+              <span className="text-foreground/70">Select tokens</span>
             )}
           </div>
         </div>
         
-        <div className="mt-6 text-center text-xs text-white/70">
+        <div className="mt-6 text-center text-xs text-foreground/70">
           <p>Data provided by @funkit/api-base • Chain ID: {sourceToken?.chainId || "1"}</p>
         </div>
       </div>

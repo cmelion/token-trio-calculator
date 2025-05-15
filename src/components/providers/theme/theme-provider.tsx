@@ -15,7 +15,7 @@ type ThemeProviderState = {
 }
 
 const initialState: ThemeProviderState = {
-  theme: "dark", // Change default to dark
+  theme: "dark", // Default to dark
   setTheme: () => null,
 }
 
@@ -23,7 +23,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
 export function ThemeProvider({
   children,
-  defaultTheme = "dark", // Change default to dark
+  defaultTheme = "dark", // Default to dark
   storageKey = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
@@ -33,8 +33,10 @@ export function ThemeProvider({
 
   useEffect(() => {
     const root = window.document.documentElement
+    const body = window.document.body
 
     root.classList.remove("light", "dark")
+    body.classList.remove("light", "dark")
 
     if (theme === "system") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
@@ -43,10 +45,12 @@ export function ThemeProvider({
         : "light"
 
       root.classList.add(systemTheme)
+      body.classList.add(systemTheme)
       return
     }
 
     root.classList.add(theme)
+    body.classList.add(theme)
   }, [theme])
 
   const value = {
