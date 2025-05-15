@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -172,7 +173,8 @@ const Index = () => {
             ))}
           </div>
           
-          <div className="flex flex-col md:flex-row items-center justify-center md:space-x-4 space-y-4 md:space-y-0 mb-6">
+          {/* Use orientation detection for better responsive layout */}
+          <div className="flex flex-col portrait:flex-col md:flex-row landscape:flex-row items-center justify-center md:space-x-4 landscape:space-x-4 space-y-4 md:space-y-0 landscape:space-y-0 mb-6">
             <TokenCard
               token={sourceToken}
               value={sourceValue}
@@ -181,7 +183,7 @@ const Index = () => {
               isSource
             />
             
-            <div className="transform rotate-90 md:rotate-0">
+            <div className="transform portrait:rotate-90 md:rotate-0 landscape:rotate-0">
               <SwapArrow />
             </div>
             
