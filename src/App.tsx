@@ -1,36 +1,24 @@
 // src/App.tsx
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useRoutes } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { SiteHeader } from "@/components/site-header";
-import { ThemeProvider } from "@/components/providers/theme";
-import { WalletProvider } from "@/components/providers/wallet";
 
-const queryClient = new QueryClient();
+// Define routes configuration
+const routes = [
+    { path: "/", element: <Index /> },
+    { path: "*", element: <NotFound /> }
+];
 
-const App = () => (
-    <QueryClientProvider client={queryClient}>
-        <ThemeProvider defaultTheme="dark">
-            <WalletProvider>
-                <TooltipProvider>
-                    <Toaster />
-                    <Sonner />
-                    <BrowserRouter>
-                        <SiteHeader />
-                        <Routes>
-                            <Route path="/" element={<Index />} />
-                            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                            <Route path="*" element={<NotFound />} />
-                        </Routes>
-                    </BrowserRouter>
-                </TooltipProvider>
-            </WalletProvider>
-        </ThemeProvider>
-    </QueryClientProvider>
-);
+const App = () => {
+    const element = useRoutes(routes);
+
+    return (
+        <>
+            <SiteHeader />
+            {element}
+        </>
+    );
+};
 
 export default App;

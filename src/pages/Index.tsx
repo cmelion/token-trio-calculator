@@ -1,14 +1,15 @@
-
 import { useState, useEffect } from "react";
 import { Toaster } from "sonner";
 import { Button, type ButtonProps } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
 import TokenCard from "@/components/TokenCard";
 import TokenSelector from "@/components/TokenSelector";
 import SwapArrow from "@/components/SwapArrow";
-import { TokenInfo, fetchAllSupportedTokens } from "@/lib/api";
+import { useAllTokens } from "@/hooks/use-tokens";
+import { TokenInfo } from "@/lib/api.ts";
+import { convertTokenValueToUsd} from "@/utils/conversion";
 
 const Index = () => {
+  // Local state for tokens and their USD values.
   const [sourceToken, setSourceToken] = useState<TokenInfo | null>(null);
   const [targetToken, setTargetToken] = useState<TokenInfo | null>(null);
   const [sourceValue, setSourceValue] = useState<string>("");
@@ -16,19 +17,15 @@ const Index = () => {
   const [isSelectingSource, setIsSelectingSource] = useState<boolean>(false);
   const [isSelectingTarget, setIsSelectingTarget] = useState<boolean>(false);
 
-  // Fetch token data
-  const { data: tokens = []} = useQuery({
-    queryKey: ["tokens"],
-    queryFn: fetchAllSupportedTokens,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
+  const { data: tokens = [] } = useAllTokens();
 
-  // Sync values when source value changes or tokens change
+  // Sync USD values from source input when tokens change
   useEffect(() => {
     if (sourceToken && targetToken && sourceValue) {
       try {
         const sourceUsdAmount = parseFloat(sourceValue);
         if (!isNaN(sourceUsdAmount)) {
+          // For now, we mirror the source USD amount as a starting point.
           setTargetValue(sourceUsdAmount.toString());
         }
       } catch (error) {
@@ -39,32 +36,32 @@ const Index = () => {
     }
   }, [sourceValue, sourceToken, targetToken]);
 
-  // Set initial tokens once loaded
+  // Set default tokens on load.
   useEffect(() => {
     if (tokens.length > 0 && !sourceToken && !targetToken) {
       // Default to USDC as source and ETH as target if available
-      const defaultSource = tokens.find(t => t.symbol === "USDC") || tokens[0];
-      const defaultTarget = tokens.find(t => t.symbol === "ETH") || 
-        (tokens.length > 1 ? tokens[1] : null);
-      
+      const defaultSource = tokens.find((t) => t.symbol === "USDC") || tokens[0];
+      const defaultTarget =
+          tokens.find((t) => t.symbol === "ETH") || (tokens.length > 1 ? tokens[1] : null);
+
       if (defaultSource) setSourceToken(defaultSource);
       if (defaultTarget) setTargetToken(defaultTarget);
     }
   }, [tokens, sourceToken, targetToken]);
 
-  // Handle token selection
-  const handleSourceTokenSelect = () => {
-    setIsSelectingSource(true);
-  };
+  // Trigger modal selection for tokens
+  const handleSourceTokenSelect = () => setIsSelectingSource(true);
+  const handleTargetTokenSelect = () => setIsSelectingTarget(true);
 
-  const handleTargetTokenSelect = () => {
-    setIsSelectingTarget(true);
-  };
-
+  /**
+   * Handles token selection from the modal.
+   * If the token selected is already assigned to the opposite side, swap the tokens.
+   * This behavior is meant to streamline the common use-case of quickly reversing the swap direction.
+   */
   const handleTokenSelect = (token: TokenInfo) => {
     if (isSelectingSource) {
-      // If selecting the same token, swap the tokens
       if (token.id === targetToken?.id) {
+        // Swap tokens to quickly reverse the swap direction.
         setSourceToken(targetToken);
         setTargetToken(sourceToken);
       } else {
@@ -72,8 +69,8 @@ const Index = () => {
       }
       setIsSelectingSource(false);
     } else if (isSelectingTarget) {
-      // If selecting the same token, swap the tokens
       if (token.id === sourceToken?.id) {
+        // Swap tokens to quickly reverse the swap direction.
         setTargetToken(sourceToken);
         setSourceToken(token);
       } else {
@@ -83,146 +80,166 @@ const Index = () => {
     }
   };
 
-  // Handle value changes from either panel
+  /**
+   * Handles changes to the source token amount.
+   * If the amount is provided in USD, we simply update the state;
+   * otherwise, convert the token amount to USD using the helper function.
+   */
   const handleSourceValueChange = (newValue: string, isUsdValue: boolean) => {
     if (isUsdValue) {
-      // Direct USD value
       setSourceValue(newValue);
     } else if (sourceToken) {
-      // Convert from token to USD
       try {
-        const tokenAmount = parseFloat(newValue);
-        if (!isNaN(tokenAmount)) {
-          const usdValue = (tokenAmount * sourceToken.price).toFixed(2);
-          setSourceValue(usdValue);
-        } else {
-          setSourceValue("");
-        }
+        // Convert using the helper function to keep logic consistent.
+        const usdValue = convertTokenValueToUsd(newValue, sourceToken.price);
+        setSourceValue(usdValue);
       } catch (error) {
         console.error("Error converting source value:", error);
       }
     }
   };
 
+  /**
+   * Handles changes to the target token amount.
+   * Synchronizes both target and source USD values for consistency.
+   */
   const handleTargetValueChange = (newValue: string, isUsdValue: boolean) => {
     if (isUsdValue) {
-      // Direct USD value
+      // Maintain synchronization between source and target when directly updating in USD.
       setTargetValue(newValue);
-      setSourceValue(newValue); // Keep USD values in sync
+      setSourceValue(newValue);
     } else if (targetToken) {
-      // Convert from token to USD
       try {
-        const tokenAmount = parseFloat(newValue);
-        if (!isNaN(tokenAmount)) {
-          const usdValue = (tokenAmount * targetToken.price).toFixed(2);
-          setTargetValue(usdValue);
-          setSourceValue(usdValue); // Keep USD values in sync
-        } else {
-          setTargetValue("");
-          setSourceValue("");
-        }
+        const usdValue = convertTokenValueToUsd(newValue, targetToken.price);
+        setTargetValue(usdValue);
+        setSourceValue(usdValue);
       } catch (error) {
         console.error("Error converting target value:", error);
       }
     }
   };
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 animate-fade-in">
-      <Toaster position="top-center" />
+    /**
+     * Handles updates to the source token price.
+     * This is useful for updating the token's price in the UI when it changes.
+     */
+  const handleSourcePriceUpdate = (updatedToken: TokenInfo) => {
+    setSourceToken(updatedToken);
+  };
 
-      <div className="w-full max-w-3xl lg:max-w-5xl mx-auto">
-      <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent pb-2 drop-shadow-sm">
-            Token Price Explorer
-          </h1>
-          <p className="text-foreground/90 font-medium">
-            Compare token values and explore potential swaps
-          </p>
-        </div>
-        
-        <div className="theme-card rounded-xl p-6 transition-all duration-300">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
-            {tokens.slice(0, 4).map((token) => (
-              <Button
-                key={token.id}
-                variant={(sourceToken?.id === token.id || targetToken?.id === token.id ? "default" : "outline") as ButtonProps["variant"]}
-                className={`
-                  ${sourceToken?.id === token.id || targetToken?.id === token.id 
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-                    : "bg-accent/20 hover:bg-primary/20 border-primary/30 text-foreground"}
+  const handleTargetPriceUpdate = (updatedToken: TokenInfo) => {
+    setTargetToken(updatedToken);
+  };
+
+  return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 animate-fade-in">
+        <Toaster position="top-center" />
+
+        <div className="w-full max-w-3xl lg:max-w-5xl mx-auto">
+          <div className="mb-8 text-center">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent pb-2 drop-shadow-sm">
+              Token Price Explorer
+            </h1>
+            <p className="text-foreground/90 font-medium">
+              Compare token values and explore potential swaps
+            </p>
+          </div>
+
+          <div className="theme-card rounded-xl p-6 transition-all duration-300">
+            {/* Token buttons for quick selections (up to 4) */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+              {tokens.slice(0, 4).map((token) => (
+                  <Button
+                      key={token.id}
+                      aria-label={`Quick select ${token.symbol}`}
+                      variant={
+                        (sourceToken?.id === token.id || targetToken?.id === token.id
+                            ? "default"
+                            : "outline") as ButtonProps["variant"]
+                      }
+                      className={`
+                  ${sourceToken?.id === token.id || targetToken?.id === token.id
+                          ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                          : "bg-accent/20 hover:bg-primary/20 border-primary/30 text-foreground"}
                   transition-all duration-200 font-medium
                 `}
-                onClick={() => {
-                  if (sourceToken?.id === token.id) {
-                    // If already selected as source, do nothing
-                    return;
-                  } else if (targetToken?.id === token.id) {
-                    // If already selected as target, swap
-                    const temp = sourceToken;
-                    setSourceToken(targetToken);
-                    setTargetToken(temp);
-                  } else {
-                    // Otherwise set as source
-                    setSourceToken(token);
-                  }
-                }}
-              >
-                {token.symbol}
-              </Button>
-            ))}
-          </div>
-          
-          {/* Use orientation detection for better responsive layout */}
-          <div className="flex flex-col portrait:flex-col md:flex-row landscape:flex-row items-center justify-center md:space-x-4 landscape:space-x-4 space-y-4 md:space-y-0 landscape:space-y-0 mb-6">
-            <TokenCard
-              token={sourceToken}
-              value={sourceValue}
-              onChange={handleSourceValueChange}
-              onTokenSelect={handleSourceTokenSelect}
-              isSource
-            />
-            
-            <div className="transform portrait:rotate-90 md:rotate-0 landscape:rotate-0">
-              <SwapArrow />
+                      onClick={() => {
+                        // If the token is already selected as the source, do nothing.
+                        if (sourceToken?.id === token.id) return;
+
+                        // If the token is selected as target, swap the tokens.
+                        if (targetToken?.id === token.id) {
+                          const temp = sourceToken;
+                          setSourceToken(targetToken);
+                          setTargetToken(temp);
+                        } else {
+                          // Otherwise, set as the source token.
+                          setSourceToken(token);
+                        }
+                      }}
+                  >
+                    {token.symbol}
+                  </Button>
+              ))}
             </div>
-            
-            <TokenCard
-              token={targetToken}
-              value={targetValue}
-              onChange={handleTargetValueChange}
-              onTokenSelect={handleTargetTokenSelect}
-            />
-          </div>
-          
-          <div className="flex justify-between text-sm px-2">
-            <span className="text-foreground font-medium">Exchange Rate:</span>
-            {sourceToken && targetToken ? (
-              <span className="text-primary font-bold">
-                1 {sourceToken.symbol} ≈ {(sourceToken.price / targetToken.price).toFixed(6)} {targetToken.symbol} (${sourceToken.price.toFixed(2)})
+
+            {/* Responsive layout for swapping tokens */}
+            <div className="flex flex-col portrait:flex-col md:flex-row landscape:flex-row items-center justify-center md:space-x-4 landscape:space-x-4 space-y-4 md:space-y-0 landscape:space-y-0 mb-6">
+              <TokenCard
+                  token={sourceToken}
+                  value={sourceValue}
+                  onChange={handleSourceValueChange}
+                  onTokenSelect={handleSourceTokenSelect}
+                  onPriceUpdate={handleSourcePriceUpdate}
+                  isSource
+              />
+
+              <div className="transform portrait:rotate-90 md:rotate-0 landscape:rotate-0">
+                <SwapArrow />
+              </div>
+
+              <TokenCard
+                  token={targetToken}
+                  value={targetValue}
+                  onChange={handleTargetValueChange}
+                  onTokenSelect={handleTargetTokenSelect}
+                  onPriceUpdate={handleTargetPriceUpdate}
+              />
+            </div>
+
+            {/* Display current exchange rate when both tokens are selected */}
+            <div className="flex justify-between text-sm px-2">
+              <span className="text-foreground font-medium">Exchange Rate:</span>
+              {sourceToken && targetToken ? (
+                  <span className="text-primary font-bold">
+                1 {sourceToken.symbol} ≈{" "}
+                    {(sourceToken.price / targetToken.price).toFixed(6)}{" "}
+                    {targetToken.symbol} (${sourceToken.price.toFixed(2)})
               </span>
-            ) : (
-              <span className="text-foreground/70">Select tokens</span>
-            )}
+              ) : (
+                  <span className="text-foreground/70">Select tokens</span>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-6 text-center text-xs text-foreground/70">
+            <p>Data provided by @funkit/api-base • Chain ID: {sourceToken?.chainId || "1"}</p>
           </div>
         </div>
-        
-        <div className="mt-6 text-center text-xs text-foreground/70">
-          <p>Data provided by @funkit/api-base • Chain ID: {sourceToken?.chainId || "1"}</p>
-        </div>
+
+        {/* Global token selector modal */}
+        <TokenSelector
+            open={isSelectingSource || isSelectingTarget}
+            onClose={() => {
+              setIsSelectingSource(false);
+              setIsSelectingTarget(false);
+            }}
+            onSelect={handleTokenSelect}
+            tokens={tokens}
+            selectedToken={isSelectingSource ? sourceToken : targetToken}
+            isSelectingSource={isSelectingSource}
+        />
       </div>
-      
-      <TokenSelector
-        open={isSelectingSource || isSelectingTarget}
-        onClose={() => {
-          setIsSelectingSource(false);
-          setIsSelectingTarget(false);
-        }}
-        onSelect={handleTokenSelect}
-        tokens={tokens}
-        selectedToken={isSelectingSource ? sourceToken : targetToken}
-      />
-    </div>
   );
 };
 

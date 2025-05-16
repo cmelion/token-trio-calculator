@@ -82,7 +82,6 @@ export async function fetchTokenInfo(symbol: string, chainId: string): Promise<T
       decimals: tokenData.decimals,
       chainId,
       address: tokenData.address,
-      logoURI: tokenData.logo || tokenData.logoURI || null,
       price: tokenPrice,
     };
   } catch (error) {
