@@ -61,9 +61,9 @@ This project requires API keys that should not be committed to the repository.
 
 ### Running Tests
 
-> **⚠️ Important:**  
-> For Playwright BDD tests to be generated against a `.feature` file, you **must** include the `@storybook-running` tag at the top of the feature or scenario.  
-> Component tests also require the @component tag to be present, or component tests will not run.  
+> **⚠️ Important:**
+> For Playwright BDD tests to be generated against a `.feature` file, you **must** include the `@storybook-running` tag at the top of the feature or scenario.
+> Component tests also require the @component tag to be present, or component tests will not run.
 > Features or scenarios **without** `@storybook-running` will be **ignored** by the test runner.
 
 When running tests that require API access:
@@ -74,3 +74,9 @@ When running tests that require API access:
 Note: The step-definitions for this exercise were brute forced and are not optimized.
 Normally we would have some established domain specific Gherkin and composable functions to streamline our step-definitions.
 These should be iterated over for better code reuse.  See [RJSF/Tailwind tests](https://github.com/cmelion/rjsf-tailwind/tree/main/tests)
+
+## Deployed Resources
+
+📚 **Interactive Storybook:** [View Component Library](https://cmelion.github.io/token-trio-calculator/storybook/)
+
+🧪 **BDD Test Results:** [View Test Reports](https://cmelion.github.io/token-trio-calculator/bdd-reports/)
