@@ -263,9 +263,14 @@ Then("the target amount should be updated", async ({ page }: World) => {
   // Use a more specific selector with the aria-label to target only one element
   const amountField = targetCard.getByRole("textbox", { name: "Target USD amount" });
 
-  // Verify the field has a non-empty value
+  // Wait for the field to have a non-empty value (with timeout)
+  await expect(async () => {
+    const value = await amountField.inputValue();
+    expect(value.trim()).not.toBe("");
+  }).toPass({ timeout: 5000 });
+
+  // Then verify the value is a valid number
   const value = await amountField.inputValue();
-  expect(value.trim()).not.toBe("");
   expect(isNaN(Number(value.replace(/[^0-9.-]+/g, '')))).toBe(false);
 });
 
