@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy Storybook and Playwright Report to GitHub Pages
 
 on:
   push:
