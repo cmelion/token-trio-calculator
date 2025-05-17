@@ -99,7 +99,6 @@ export const handlers = [
      * Returns deterministic mock balances in Storybook, otherwise passes through.
      */
     http.get('/api/wallet/balances', async ({ request }) => {
-        if (!isStorybook()) return passthrough()
         // Parse query params for provider and address, with sensible defaults
         const url = new URL(request.url)
         const provider = url.searchParams.get('provider') || 'metamask'
