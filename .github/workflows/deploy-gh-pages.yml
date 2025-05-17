@@ -57,7 +57,13 @@ jobs:
           echo "Copied $file_count BDD test report files to dist/bdd-reports/"
 
       - name: Build Storybook
-        run: npm run build-storybook -o dist/storybook
+        run: npm run build-storybook
+
+      - name: Copy Storybook to dist
+        run: |
+          mkdir -p dist/storybook
+          cp -R storybook-static/. dist/storybook/
+          echo "Copied Storybook files to dist/storybook/"
 
       # Add GitHub Pages deployment steps
       - name: Setup Pages
