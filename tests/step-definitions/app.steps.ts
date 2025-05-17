@@ -497,8 +497,8 @@ Then("I should see the token balances displayed on the token cards", async ({ pa
 });
 
 Then("I should see a balance warning if the amount exceeds my balance", async ({ page }: World) => {
-  // Wait for the toast to appear
-  const toast = page.getByRole('status', {});
+  // Wait for the toast to appear and filter for the correct element
+  const toast = page.locator('span[role="status"]', { hasText: /Your .* balance .* is less than the amount you're trying to spend/ });
   await expect(toast).toBeVisible({ timeout: 2000 });
 
   // Verify the toast content
