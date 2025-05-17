@@ -49,6 +49,16 @@ jobs:
       - name: Run BDD tests
         run: npm run test:bdd:ci
 
+      - name: Copy BDD test reports to dist
+        run: |
+          mkdir -p dist/bdd-reports
+          cp -R playwright-report/. dist/bdd-reports/
+          file_count=$(find dist/bdd-reports -type f | wc -l)
+          echo "Copied $file_count BDD test report files to dist/bdd-reports/"
+
+      - name: Build Storybook
+        run: npm run build-storybook -o dist/storybook
+
       # Add GitHub Pages deployment steps
       - name: Setup Pages
         uses: actions/configure-pages@v4
