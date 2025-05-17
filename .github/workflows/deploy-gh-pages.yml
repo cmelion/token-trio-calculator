@@ -30,7 +30,7 @@ jobs:
         run: npm install
 
       - name: Install Playwright Browsers
-        run: npm run playwright install chromium
+        run: npx playwright install chromium
 
       - name: Build App
         run: npm run build
