@@ -132,18 +132,18 @@ const Index = () => {
   };
 
   return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 animate-fade-in">
-        <Toaster position="top-center" />
+    <div className="flex flex-col items-center justify-center p-4 pt-16 animate-fade-in h-full">
+      <Toaster position="top-center" />
 
-        <div className="w-full max-w-3xl lg:max-w-5xl mx-auto">
-          <div className="mb-8 text-center">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent pb-2 drop-shadow-sm">
-              Token Price Explorer
-            </h1>
-            <p className="text-foreground/90 font-medium">
-              Compare token values and explore potential swaps
-            </p>
-          </div>
+      <div className="w-full max-w-3xl lg:max-w-5xl mx-auto">
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent pb-2 drop-shadow-sm">
+            Token Price Explorer
+          </h1>
+          <p className="text-foreground/90 font-medium">
+            Compare token values and explore potential swaps
+          </p>
+        </div>
 
           <div className="theme-card rounded-xl p-6 transition-all duration-300">
             {/* Token buttons for quick selections (up to 4) */}
