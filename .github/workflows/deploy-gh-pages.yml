@@ -32,9 +32,6 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install chromium
 
-      - name: Build App
-        run: npm run build
-
       - name: Run BDD tests
         run: npm run test:bdd:ci
 
