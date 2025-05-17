@@ -27,16 +27,16 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: yarn install
+        run: npm install
 
       - name: Install Playwright Browsers
-        run: yarn playwright install chromium
+        run: npm run playwright install chromium
 
       - name: Build App
-        run: yarn build
+        run: npm run build
 
       - name: Run BDD tests
-        run: yarn test:bdd:ci
+        run: npm run test:bdd:ci
 
       - name: Copy BDD test reports to dist
         run: |
@@ -46,7 +46,7 @@ jobs:
           echo "Copied $file_count BDD test report files to dist/bdd-reports/"
 
       - name: Build Storybook
-        run: yarn build-storybook -o dist/storybook
+        run: npm run build-storybook -o dist/storybook
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v4
