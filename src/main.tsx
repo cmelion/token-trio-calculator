@@ -49,6 +49,7 @@ async function prepare() {
 
 // Initialize the environment, then render the app
 prepare().then(() => {
+  const basename = import.meta.env.BASE_URL || "/";
   createRoot(document.getElementById("root")!).render(
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -56,7 +57,7 @@ prepare().then(() => {
             <TooltipProvider>
               <Toaster />
               <Sonner />
-              <BrowserRouter>
+              <BrowserRouter basename={basename}>
                 <App />
               </BrowserRouter>
             </TooltipProvider>
