@@ -15,7 +15,7 @@ export function SiteHeader() {
             <nav className="flex items-center space-x-3">
               <ConnectWalletButton />
               <a
-                  href="https://github.com/cmelion/token-trio-calculator-4c8f3ad9"
+                  href="https://github.com/cmelion/token-trio-calculator"
                   target="_blank"
                   rel="noreferrer"
                   title="View source on GitHub"
@@ -25,7 +25,7 @@ export function SiteHeader() {
                 <GithubIcon className="size-6" />
               </a>
               <a
-                  href="https://cmelion.github.io/token-trio-calculator-4c8f3ad9/storybook/"
+                  href="https://cmelion.github.io/token-trio-calculator/storybook/"
                   target="_blank"
                   rel="noreferrer"
                   title="View Storybook"
