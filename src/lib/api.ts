@@ -1,4 +1,3 @@
-
 import {
   getAssetErc20ByChainAndSymbol,
   getAssetPriceInfo
@@ -7,7 +6,58 @@ import {
 // Replace hardcoded API key with environment variable
 const API_KEY = import.meta.env.VITE_API_KEY;
 
-export interface TokenInfo {
+/**
+ * Fetches only the token metadata without price information
+ */
+export async function fetchTokenMetadata(symbol: string, chainId: string): Promise<TokenMetadata | null> {
+  try {
+    const tokenData = await getAssetErc20ByChainAndSymbol({
+      chainId,
+      symbol,
+      apiKey: API_KEY,
+    }) as TokenApiResponse;
+
+    if (!tokenData) {
+      console.error(`No token data found for ${symbol}`);
+      return null;
+    }
+
+    return {
+      id: `${chainId}-${tokenData.address}`,
+      name: tokenData.name,
+      symbol: tokenData.symbol,
+      decimals: tokenData.decimals,
+      chainId,
+      address: tokenData.address,
+      logoURI: tokenData.logoURI
+    };
+  } catch (error) {
+    console.error(`Error fetching token metadata for ${symbol}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Fetches only the token price information
+ */
+export async function fetchTokenPrice(address: string, chainId: string): Promise<number> {
+  try {
+    const priceData = await getAssetPriceInfo({
+      chainId,
+      assetTokenAddress: address,
+      apiKey: API_KEY,
+    }) as PriceApiResponse;
+
+    // Use the API price, with fallback to 1 if no price is available
+    return priceData?.unitPrice || priceData?.usdPrice || priceData?.price || 1;
+  } catch (error) {
+    console.error(`Error fetching price for token at ${address}:`, error);
+    return 1; // Default fallback price
+  }
+}
+
+// Update types to reflect the split
+export interface TokenMetadata {
   id: string;
   name: string;
   symbol: string;
@@ -15,6 +65,9 @@ export interface TokenInfo {
   chainId: string;
   logoURI?: string;
   address: string;
+}
+
+export interface TokenInfo extends TokenMetadata {
   price: number;
 }
 

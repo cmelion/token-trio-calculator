@@ -24,9 +24,11 @@ document.body.classList.add(getThemePreference());
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 0,           // Data is considered stale immediately
-      refetchInterval: 10000, // Refetch every 10 seconds by default to keep volatile data current
-      refetchIntervalInBackground: true,
+      // Default settings that will apply to all queries unless overridden
+      staleTime: 5 * 60 * 1000,      // 5 minutes by default
+      gcTime: 60 * 60 * 1000,        // 1 hour
+      refetchInterval: false,        // No automatic refetching by default
+      refetchIntervalInBackground: false,
       retry: 1,
     },
   },
