@@ -492,12 +492,12 @@ Then("I should see the wallet name {string} in the header", async ({ page }: Wor
 Then("I should see the token balances displayed on the token cards", async ({ page }: World) => {
   // Scope to the source card
   const sourceCard = page.locator('div', { has: page.getByText('You pay', { exact: true }) });
-  const sourceBalance = sourceCard.getByText(/Balance: .+\(.+\)/);
+  const sourceBalance = sourceCard.getByText(/Balance: .+\(.+\)/).first();
   await expect(sourceBalance).toBeVisible({ timeout: 5000 });
 
   // Scope to the target card
   const targetCard = page.locator('div', { has: page.getByText('You receive', { exact: true }) });
-  const targetBalance = targetCard.getByText(/Balance: .+\(.+\)/);
+  const targetBalance = targetCard.getByText(/Balance: .+\(.+\)/).first();
   await expect(targetBalance).toBeVisible({ timeout: 5000 });
 });
 
