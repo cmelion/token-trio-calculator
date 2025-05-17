@@ -3,24 +3,21 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  base: mode === "production" ? "/token-trio-calculator/" : "/", // Adjust for GitHub Pages
   server: {
     host: "::",
     port: 8080,
     hmr: {
       overlay: true,
-      // If you're behind a proxy or having network issues, you might need:
-      // clientPort: 8080, // or whatever port your app is served on
     },
     watch: {
-      usePolling: true, // Helps detect changes in some environments
+      usePolling: true,
     },
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === "development" && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
