@@ -4,27 +4,31 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-    hmr: {
-      overlay: true,
-      // If you're behind a proxy or having network issues, you might need:
-      // clientPort: 8080, // or whatever port your app is served on
-    },
-    watch: {
-      usePolling: true, // Helps detect changes in some environments
-    },
-  },
-  plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-}));
+export default defineConfig(({ mode, command }) => {
+    // Determine if we're building for GitHub Pages
+    const isGitHubPages = process.env.GITHUB_ACTIONS === 'true';
+    const base = isGitHubPages ? '/token-trio-calculator/' : '/';
+
+    return {
+        base,
+        server: {
+            host: "::",
+            port: 8080,
+            hmr: {
+                overlay: true,
+            },
+            watch: {
+                usePolling: true,
+            },
+        },
+        plugins: [
+            react(),
+            mode === 'development' && componentTagger(),
+        ].filter(Boolean),
+        resolve: {
+            alias: {
+                "@": path.resolve(__dirname, "./src"),
+            },
+        },
+    };
+});

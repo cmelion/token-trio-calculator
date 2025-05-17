@@ -34,16 +34,33 @@ const queryClient = new QueryClient({
 
 // Prepare the application environment
 async function prepare() {
-  // MSW setup code remains unchanged
+  // Check if we're in a development environment
   if (import.meta.env.DEV) {
     const { worker } = await import('./mocks/browser');
     return worker.start({
       onUnhandledRequest: 'bypass',
     });
-  } else if (import.meta.env.VITE_ENABLE_MSW === 'true') {
-    const { startMSW } = await import('./mocks/browser');
-    return startMSW();
   }
+
+  // Only enable MSW in production if explicitly configured
+  if (import.meta.env.VITE_ENABLE_MSW === 'true') {
+    try {
+      console.log('MSW base path:', import.meta.env.BASE_URL);
+      const { startMSW } = await import('./mocks/browser');
+      return startMSW({
+        serviceWorkerUrl: `${import.meta.env.BASE_URL}mockServiceWorker.js`
+      }).catch(error => {
+        console.warn('MSW initialization failed, continuing without mocks:', error);
+        return Promise.resolve();
+      });
+    } catch (error) {
+      console.warn('MSW import failed, continuing without mocks:', error);
+      return Promise.resolve();
+    }
+  }
+
+  // Skip MSW in all other cases (including preview)
+  console.log('Skipping MSW initialization');
   return Promise.resolve();
 }
 
