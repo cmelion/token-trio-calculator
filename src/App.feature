@@ -63,3 +63,14 @@ Feature: Token Swap Application
     And the target token is "USDC"
     Then I should see the exchange rate between "ETH" and "USDC"
     And the exchange rate should show the price in USD
+
+  Scenario: Connecting a wallet and viewing token balances
+    Given I am viewing the application
+    When I click the "Connect Wallet" button
+    Then I should see the wallet connection dialog
+    When I select the "Coinbase Wallet" wallet provider
+    Then the wallet should be connected
+    And I should see the wallet name "Coinbase" in the header
+    And I should see the token balances displayed on the token cards
+    When I enter "1000" in the source amount field
+    Then I should see a balance warning if the amount exceeds my balance

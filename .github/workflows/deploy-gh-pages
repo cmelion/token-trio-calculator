@@ -1,0 +1,74 @@
+name: Publish Storybook and Playwright Reports
+
+on:
+  push:
+    branches:
+      - main # or your default branch
+
+permissions:
+  id-token: write
+  contents: read
+  pages: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Install Playwright Browsers
+        run: yarn playwright install chromium
+
+      - name: Build App
+        run: yarn build
+
+      - name: Run tests with coverage
+        run: yarn test:components:coverage
+
+      - name: Copy coverage reports to dist
+        run: |
+          mkdir -p dist/coverage
+          cp -R coverage/components/. dist/coverage/
+          file_count=$(find dist/coverage -type f | wc -l)
+          echo "Copied $file_count component coverage report files to dist/coverage/"
+
+      - name: Run BDD tests
+        run: yarn test:bdd:ci
+
+      - name: Copy Playwright test reports to dist
+        run: |
+          mkdir -p dist/playwright-report
+          cp -R playwright-report/. dist/playwright-report/
+          file_count=$(find dist/playwright-report -type f | wc -l)
+          echo "Copied $file_count Playwright report files to dist/playwright-report/"
+
+      - name: Build Storybook
+        run: yarn build-storybook -o dist/storybook
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages
+          token: ${{ secrets.GITHUB_TOKEN }}

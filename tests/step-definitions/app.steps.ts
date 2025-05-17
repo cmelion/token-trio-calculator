@@ -436,3 +436,71 @@ Then("the source and target tokens should be swapped", async ({ page }: World) =
   const rateElement = exchangeRateContainer.getByText(ratePattern);
   await expect(rateElement).toBeVisible();
 });
+
+//====================================================================================
+// SCENARIO: Connecting a wallet and viewing token balances
+//====================================================================================
+
+When("I click the {string} button", async ({ page }: World, buttonText: string) => {
+  // Find and click the button with the specified text
+  const button = page.getByRole('button', { name: new RegExp(buttonText, 'i') });
+  await expect(button).toBeVisible();
+  await button.click();
+});
+
+Then("I should see the wallet connection dialog", async ({ page }: World) => {
+  // Verify the wallet connection dialog is visible
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+
+  // Verify the dialog title
+  const dialogTitle = page.getByRole('heading', { name: 'Connect Wallet' });
+  await expect(dialogTitle).toBeVisible();
+
+  // Verify the wallet providers are displayed
+  const walletProviders = page.getByRole('listbox', { name: 'Available wallet providers' });
+  await expect(walletProviders).toBeVisible();
+});
+
+When("I select the {string} wallet provider", async ({ page }: World, providerName: string) => {
+  // Find and click the wallet provider button
+  const walletButton = page.getByRole('option', { name: new RegExp(`Connect with ${providerName}`, 'i') });
+  await expect(walletButton).toBeVisible();
+  await walletButton.click();
+
+  // Wait for the dialog to close and connection to complete
+  await page.waitForTimeout(500);
+});
+
+Then("the wallet should be connected", async ({ page }: World) => {
+  // Verify the wallet connection indicator is visible
+  const connectedIndicator = page.locator('.bg-green-500');
+  await expect(connectedIndicator).toBeVisible();
+});
+
+Then("I should see the wallet name {string} in the header", async ({ page }: World, walletName: string) => {
+  // Verify the wallet name is displayed in the header
+  const walletNameElement = page.getByText(walletName, { exact: true });
+  await expect(walletNameElement).toBeVisible();
+});
+
+Then("I should see the token balances displayed on the token cards", async ({ page }: World) => {
+  // Scope to the source card
+  const sourceCard = page.locator('div', { has: page.getByText('You pay', { exact: true }) });
+  const sourceBalance = sourceCard.getByText(/Balance: .+\(.+\)/);
+  await expect(sourceBalance).toBeVisible({ timeout: 5000 });
+
+  // Scope to the target card
+  const targetCard = page.locator('div', { has: page.getByText('You receive', { exact: true }) });
+  const targetBalance = targetCard.getByText(/Balance: .+\(.+\)/);
+  await expect(targetBalance).toBeVisible({ timeout: 5000 });
+});
+
+Then("I should see a balance warning if the amount exceeds my balance", async ({ page }: World) => {
+  // Wait for the toast to appear
+  const toast = page.getByRole('status', {});
+  await expect(toast).toBeVisible({ timeout: 2000 });
+
+  // Verify the toast content
+  await expect(toast).toHaveText(/Your .* balance .* is less than the amount you're trying to spend/);
+});
