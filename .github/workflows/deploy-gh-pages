@@ -1,4 +1,4 @@
-name: Publish Storybook and Playwright Reports
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -35,25 +35,15 @@ jobs:
       - name: Build App
         run: yarn build
 
-      - name: Run tests with coverage
-        run: yarn test:components:coverage
-
-      - name: Copy coverage reports to dist
-        run: |
-          mkdir -p dist/coverage
-          cp -R coverage/components/. dist/coverage/
-          file_count=$(find dist/coverage -type f | wc -l)
-          echo "Copied $file_count component coverage report files to dist/coverage/"
-
       - name: Run BDD tests
         run: yarn test:bdd:ci
 
-      - name: Copy Playwright test reports to dist
+      - name: Copy BDD test reports to dist
         run: |
-          mkdir -p dist/playwright-report
-          cp -R playwright-report/. dist/playwright-report/
-          file_count=$(find dist/playwright-report -type f | wc -l)
-          echo "Copied $file_count Playwright report files to dist/playwright-report/"
+          mkdir -p dist/bdd-reports
+          cp -R playwright-report/. dist/bdd-reports/
+          file_count=$(find dist/bdd-reports -type f | wc -l)
+          echo "Copied $file_count BDD test report files to dist/bdd-reports/"
 
       - name: Build Storybook
         run: yarn build-storybook -o dist/storybook
