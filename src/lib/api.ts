@@ -2,6 +2,7 @@ import {
   getAssetErc20ByChainAndSymbol,
   getAssetPriceInfo
 } from '@funkit/api-base';
+import {UseQueryOptions} from "@tanstack/react-query";
 
 // Replace hardcoded API key with environment variable
 const API_KEY = import.meta.env.VITE_API_KEY;
@@ -155,4 +156,10 @@ export async function fetchAllSupportedTokens(): Promise<TokenInfo[]> {
     console.error('Error fetching all tokens:', error);
     return [];
   }
+}
+
+// Create an interface for the options parameter
+export interface TokenInfoOptions extends Omit<UseQueryOptions<TokenInfo, Error, TokenInfo, string[]>, 'queryKey' | 'queryFn'> {
+  enabled?: boolean;
+  onSuccess?: (data: TokenInfo) => void;
 }

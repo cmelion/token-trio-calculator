@@ -16,20 +16,20 @@ export class BaseFormTester
     this.adapter = adapter; // Ensure it's assigned to the public property
   }
 
-  // Rest of the class remains unchanged
   async findFormByLabel(label: string | RegExp): Promise<FormElement | null> {
-    return this.adapter.findFormByLabel(label);
+    return await this.adapter.findFormByLabel(label) as Promise<FormElement | null>;
   }
+
   async findFieldByRole(role: AriaRole, options: { name: string | RegExp }, container?: FormElement): Promise<InputElement | null> {
-    return this.adapter.findByRole(container, role, options)
+    return await this.adapter.findByRole(container, role, options) as Promise<InputElement | null>;
   }
 
   async findButtonByRole(role: AriaRole, options: { name: string | RegExp }, container?: FormElement): Promise<ButtonElement | null> {
-    return this.adapter.findByRole(container, role, options)
+    return await this.adapter.findByRole(container, role, options) as Promise<ButtonElement | null>;
   }
 
   async findElementByRole(role: string, options: { name: string | RegExp }, container?: FormElement): Promise<FormElement | null> {
-    return this.adapter.findByRole(container, role, options)
+    return await this.adapter.findByRole(container, role, options) as Promise<FormElement | null>;
   }
 
   async waitForElementByRole(role: string, options: { name?: string | RegExp, timeout?: number } = {}, container?: FormElement): Promise<FormElement | null> {
@@ -38,9 +38,9 @@ export class BaseFormTester
 
     while (Date.now() - startTime < timeout) {
       try {
-        const element = await this.adapter.findByRole(container, role, { name })
+        const element = await this.adapter.findByRole(container, role, { name }) as FormElement;
         if (element) {
-          return element
+          return element;
         }
       } catch (error) {
         // Element not found yet, continue waiting
@@ -50,10 +50,10 @@ export class BaseFormTester
       await new Promise(resolve => setTimeout(resolve, 100))
     }
 
-    return null
+    return null;
   }
 
   async findElementByText(text: string | RegExp, container?: FormElement): Promise<FormElement | null> {
-    return this.adapter.findByText(container, text);
+    return await this.adapter.findByText(container, text) as Promise<FormElement | null>;
   }
 }

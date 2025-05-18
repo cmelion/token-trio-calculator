@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,19 +21,21 @@ const TokenSelector = ({
                          selectedToken,
                          isSelectingSource = false,
                        }: TokenSelectorProps) => {
+  // Reset search when dialog opens or closes
   const [searchQuery, setSearchQuery] = useState("");
-
-  const filteredTokens = tokens.filter((token) =>
-      token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      token.symbol.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Reset search when dialog opens
+  
+  // Reset search when the dialog opens
+  // This is a legitimate use of useEffect - handling a side effect based on prop changes
   useEffect(() => {
     if (open) {
       setSearchQuery("");
     }
   }, [open]);
+
+  const filteredTokens = tokens.filter((token) =>
+      token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      token.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
       <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>

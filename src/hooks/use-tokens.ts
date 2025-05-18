@@ -1,5 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
-import { fetchTokenMetadata, fetchTokenPrice, TokenInfo, TokenMetadata, fetchAllSupportedTokens } from '@/lib/api';
+import { useQuery } from "@tanstack/react-query"
+import {
+  fetchAllSupportedTokens,
+  fetchTokenMetadata,
+  fetchTokenPrice,
+  TokenInfo,
+  TokenInfoOptions,
+  TokenMetadata,
+} from "@/lib/api"
 
 /**
  * Hook to fetch only the token metadata (static information that rarely changes).
@@ -16,7 +23,7 @@ export function useTokenMetadata(symbol: string, chainId: string) {
   return useQuery<TokenMetadata | null, Error>({
     // Unique key for this query, includes both token symbol and chain ID
     // to properly cache different tokens across different chains
-    queryKey: ['tokenMetadata', symbol, chainId],
+    queryKey: ["tokenMetadata", symbol, chainId],
 
     // The fetch function that retrieves only the metadata for this specific token/chain
     queryFn: () => fetchTokenMetadata(symbol, chainId),
@@ -27,7 +34,7 @@ export function useTokenMetadata(symbol: string, chainId: string) {
 
     // Keep unused metadata in cache for 24 hours before garbage collection
     // This prevents re-fetching if user navigates away and returns later
-    gcTime: 24 * 60 * 60 * 1000,   // 24 hours
+    gcTime: 24 * 60 * 60 * 1000, // 24 hours
 
     // Only execute the query when both parameters are provided
     // Prevents unnecessary API calls with incomplete data
@@ -36,7 +43,7 @@ export function useTokenMetadata(symbol: string, chainId: string) {
     // Use previous data while fetching new data
     // Provides smoother UX by avoiding empty states during refetches
     placeholderData: (previousData) => previousData ?? null,
-  });
+  })
 }
 
 /**
@@ -51,20 +58,24 @@ export function useTokenMetadata(symbol: string, chainId: string) {
  * @param options - Additional options to control query behavior
  * @returns Query result with token price, loading state, and error information
  */
-export function useTokenPrice(address: string, chainId: string, options?: { enabled?: boolean }) {
+export function useTokenPrice(
+  address: string,
+  chainId: string,
+  options?: { enabled?: boolean },
+) {
   return useQuery<number, Error>({
     // Unique key for this price query that includes token address and chain
-    queryKey: ['tokenPrice', address, chainId],
+    queryKey: ["tokenPrice", address, chainId],
 
     // The fetch function that retrieves only the price for this specific token
     queryFn: () => fetchTokenPrice(address, chainId),
 
     // Consider price data stale after 10 seconds
     // Prices can change rapidly, so we want to refresh frequently
-    staleTime: 10 * 1000,        // 10 seconds
+    staleTime: 10 * 1000, // 10 seconds
 
     // Refetch price data every 10 seconds to keep trading data current
-    refetchInterval: 10 * 1000,  // 10 seconds
+    refetchInterval: 10 * 1000, // 10 seconds
 
     // Continue refetching prices even when the app is in the background
     // This ensures we have current data when user returns to the active tab
@@ -72,14 +83,15 @@ export function useTokenPrice(address: string, chainId: string, options?: { enab
 
     // Only fetch when explicitly enabled or when we have valid parameters
     // This prevents unnecessary API calls, especially when token metadata is loading
-    enabled: options?.enabled !== undefined
-      ? options.enabled
-      : Boolean(address && chainId),
+    enabled:
+      options?.enabled !== undefined
+        ? options.enabled
+        : Boolean(address && chainId),
 
     // Default to 1 if no previous price data is available
     // This prevents UI glitches when transitioning between tokens
     placeholderData: (previousData) => previousData ?? 1,
-  });
+  })
 }
 
 /**
@@ -92,40 +104,53 @@ export function useTokenPrice(address: string, chainId: string, options?: { enab
  *
  * @param symbol - The token symbol (e.g., "ETH", "BTC")
  * @param chainId - The blockchain network identifier
+ * @param options - Optional query configuration options including callbacks
  * @returns Combined query result with complete token information
  */
-export function useTokenInfo(symbol: string, chainId: string) {
+export function useTokenInfo(
+  symbol: string,
+  chainId: string,
+  options?: TokenInfoOptions,
+) {
   // Fetch metadata (infrequently changing data)
   const {
     data: metadata,
     isLoading: isLoadingMetadata,
-    isError: isErrorMetadata
-  } = useTokenMetadata(symbol, chainId);
+    isError: isErrorMetadata,
+  } = useTokenMetadata(symbol, chainId)
 
   // Fetch price data (frequently changing) only if we have metadata
   // This prevents unnecessary price API calls when metadata isn't available
   const {
     data: price,
     isLoading: isLoadingPrice,
-    isError: isErrorPrice
-  } = useTokenPrice(
-    metadata?.address || '',
-    chainId,
-    { enabled: Boolean(metadata?.address) }
-  );
+    isError: isErrorPrice,
+    ...rest
+  } = useTokenPrice(metadata?.address || "", chainId, {
+    enabled: Boolean(metadata?.address),
+    // Forward the onSuccess callback with transformed data
+    onSuccess: (priceData: number) => {
+      if (metadata && priceData !== undefined && options?.onSuccess) {
+        // Call the original onSuccess with combined data
+        options.onSuccess({ ...metadata, price: priceData })
+      }
+    },
+    // Forward any other options
+    ...options,
+  })
 
   // Combine the metadata and price into a complete TokenInfo object
   // Only return data when both metadata and price are available
-  const data: TokenInfo | null = metadata && price !== undefined
-    ? { ...metadata, price }
-    : null;
+  const data: TokenInfo | null =
+    metadata && price !== undefined ? { ...metadata, price } : null
 
   // Combine loading and error states from both queries
   return {
     data,
     isLoading: isLoadingMetadata || isLoadingPrice,
-    isError: isErrorMetadata || isErrorPrice
-  };
+    isError: isErrorMetadata || isErrorPrice,
+    ...rest,
+  }
 }
 
 /**
@@ -140,19 +165,19 @@ export function useTokenInfo(symbol: string, chainId: string) {
 export function useAllTokens() {
   return useQuery<TokenInfo[], Error>({
     // Simple query key for the token list
-    queryKey: ['tokens'],
+    queryKey: ["tokens"],
 
     // Function that fetches all token data
     queryFn: fetchAllSupportedTokens,
 
     // Keep data "fresh" for 1 hour before considering it stale
-    // Token list rarely changes, so we can avoid unnecessary refetches 
+    // Token list rarely changes, so we can avoid unnecessary refetches
     // This significantly reduces API load and improves performance
-    staleTime: 1000 * 60 * 60,     // 1 hour
+    staleTime: 1000 * 60 * 60, // 1 hour
 
     // Keep unused data in cache for 4 hours before garbage collection
-    // If user navigates away and returns within 4 hours, we'll still have 
+    // If user navigates away and returns within 4 hours, we'll still have
     // the data without needing to refetch, improving user experience
-    gcTime: 1000 * 60 * 60 * 4,    // 4 hours
-  });
+    gcTime: 1000 * 60 * 60 * 4, // 4 hours
+  })
 }

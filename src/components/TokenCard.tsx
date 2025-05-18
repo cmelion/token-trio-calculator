@@ -1,13 +1,36 @@
 // src/components/TokenCard.tsx
-import { ArrowDownUp, DollarSign } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
-import { useWallet } from "@/components/providers/wallet"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { useToast } from "@/components/ui/use-toast"
-import { useTokenInfo } from "@/hooks/use-tokens"
-import { TokenInfo } from "@/lib/api"
+import { ArrowDownUp, DollarSign } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { useWallet } from "@/components/providers/wallet";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import { useTokenInfo } from "@/hooks/use-tokens";
+import { TokenInfo } from "@/lib/api";
 
+/**
+ * TokenCard Component
+ * 
+ * A flexible component for displaying and interacting with cryptocurrency tokens.
+ * This component allows users to input token amounts in either USD or token units,
+ * with real-time conversion between the two formats.
+ * 
+ * Design Decisions:
+ * - Callback pattern vs useEffect:
+ *   We've chosen to use callbacks (like onSuccess in useTokenInfo) rather than
+ *   useEffect hooks for handling reactive data updates. This provides several benefits:
+ *   1. More declarative code - effects happen directly where data changes
+ *   2. Fewer dependency array issues and potential for stale closures
+ *   3. Clearer data flow throughout the component
+ *   4. Prevents unnecessary re-renders and potential render loops
+ * 
+ * - State architecture:
+ *   The component maintains two parallel value pathways:
+ *   1. Internal display value (controlled by inputMode)
+ *   2. External value (always in USD for consistent parent state)
+ *   This separation allows for flexible display while keeping parent components
+ *   simple by always providing values in a consistent format.
+ */
 interface TokenCardProps {
   token: TokenInfo | null
   value: string
@@ -27,27 +50,120 @@ const TokenCard = ({
   isSource = false,
   disabled = false,
 }: TokenCardProps) => {
-  // Only fetch live data if we have a token
+  /**
+   * Get token decimals with a fallback value.
+   * Extracted to a callback for reuse and to avoid dependency issues in useMemo hooks.
+   */
+  const getTokenDecimals = useCallback(() => {
+    return token?.decimals || 8 // Default to 8 if not specified
+  }, [token?.decimals])
+
+  /**
+   * Fetch live token data using our custom hook.
+   * 
+   * Important design decision: We use the onSuccess callback pattern instead of useEffect
+   * to update token prices. This is more efficient because:
+   * 1. It only runs when new data arrives (not on every render)
+   * 2. It avoids dependency array management issues common with useEffect
+   * 3. It creates a clearer data flow path (data arrives → callback runs)
+   */
   const { data: liveToken } = useTokenInfo(
     token?.symbol || "",
     token?.chainId || "1",
+    {
+      onSuccess: (data: { price: number }) => {
+        // Update price when live token data changes
+        if (
+          data?.price &&
+          token &&
+          data.price !== token.price &&
+          onPriceUpdate
+        ) {
+          onPriceUpdate({ ...token, price: data.price })
+        }
+      },
+    },
   )
 
-  // Create a merged token that takes properties from the prop token but price from live data
-  const currentToken = token
+  /**
+   * Create a merged token object that combines the original token data
+   * with the latest price information from our live data feed.
+   * 
+   * Using useMemo here is critical for performance as it prevents 
+   * unnecessary recalculations when other state changes.
+   */
+  const currentToken = useMemo(() => token
     ? {
         ...token,
         // Use the live token price when available, otherwise use the original price
         price: liveToken?.price ?? token.price,
       }
-    : null
+    : null,
+    [token, liveToken?.price]
+  )
 
+  // State for tracking whether the user is inputting in token units or USD
   const [inputMode, setInputMode] = useState<"token" | "usd">("usd")
   const { wallet } = useWallet()
   const { toast } = useToast()
+  // Track last warning time to prevent spamming the user with balance warnings
   const [lastWarningTime, setLastWarningTime] = useState(0)
-  const [inputValue, setInputValue] = useState("") // Local state to track actual input value
-  // Memoize validateBalance to avoid recreation on each render
+
+  /**
+   * Calculate the displayed input value based on the current inputMode.
+   * 
+   * Using useMemo for this calculation ensures we only recalculate when
+   * the dependencies change, not on every render. This improves performance
+   * especially during rapid input changes.
+   */
+  const inputValue = useMemo(() => {
+    if (!token || !value) return ""
+    
+    if (inputMode === "token" && token.price > 0) {
+      const usdValue = parseFloat(value)
+      if (!isNaN(usdValue)) {
+        return (usdValue / token.price).toFixed(getTokenDecimals())
+      }
+    } 
+    return value
+  }, [value, token, inputMode, getTokenDecimals])
+
+  /**
+   * Calculate the secondary display value shown below the input field.
+   * This provides real-time conversion between USD and token amounts.
+   * 
+   * Using useMemo for this calculation prevents unnecessary recalculations
+   * on every render, only updating when the input value or token changes.
+   */
+  const secondaryValue = useMemo(() => {
+    if (!token || !inputValue) return ""
+
+    try {
+      if (inputMode === "token") {
+        // Show USD value when in token mode, rounded up to nearest penny
+        const tokenAmount = parseFloat(inputValue)
+        if (isNaN(tokenAmount)) return ""
+        return `≈ $${(Math.ceil(tokenAmount * token.price * 100) / 100).toFixed(2)}`
+      } else if (inputMode === "usd") {
+        // Show token amount when in USD mode
+        const usdAmount = parseFloat(inputValue)
+        if (isNaN(usdAmount) || token.price <= 0) return ""
+        return `≈ ${(usdAmount / token.price).toFixed(getTokenDecimals())} ${token.symbol}`
+      }
+      return ""
+    } catch (error) {
+      console.error("Error calculating secondary value:", error)
+      return ""
+    }
+  }, [token, inputValue, inputMode, getTokenDecimals])
+
+  /**
+   * Validate if the user has sufficient balance for the entered amount.
+   * 
+   * Using useCallback here ensures that this function doesn't get recreated
+   * on every render, which would cause unnecessary re-renders of child components
+   * if this function were passed as a prop.
+   */
   const validateBalance = useCallback(
     (enteredValue: string) => {
       if (!token || !wallet) return
@@ -92,45 +208,19 @@ const TokenCard = ({
     [token, wallet, lastWarningTime, setLastWarningTime, toast, inputMode],
   )
 
-  // Update local input value when parent value changes and handle price updates
-  useEffect(() => {
-    // Handle input value updates
-    if (token && value) {
-      if (inputMode === "token" && token.price > 0) {
-        const usdValue = parseFloat(value)
-        if (!isNaN(usdValue)) {
-          setInputValue((usdValue / token.price).toFixed(6))
-        }
-      } else {
-        setInputValue(value)
-      }
-    } else {
-      setInputValue("")
-    }
-
-    // Handle price updates when live token data changes
-    if (
-      liveToken?.price &&
-      token &&
-      liveToken.price !== token.price &&
-      onPriceUpdate
-    ) {
-      onPriceUpdate({ ...token, price: liveToken.price })
-    }
-  }, [value, token, inputMode, liveToken, onPriceUpdate])
-
-  // Validate balance whenever relevant values change
-  useEffect(() => {
-    if (isSource && token && wallet && inputValue) {
-      validateBalance(inputValue)
-    }
-  }, [value, token, wallet, isSource, inputMode, inputValue, validateBalance])
-
-  const getTokenDecimals = () => {
-    return token?.decimals || 8 // Default to 8 if not specified
-  }
-
-  // Update handleInputChange to limit token decimals appropriately
+  /**
+   * Handle input changes with proper validation and formatting.
+   * 
+   * This approach handles several complex concerns:
+   * 1. Input validation to ensure only valid numbers are entered
+   * 2. Enforcing decimal precision limits based on token decimals
+   * 3. Converting between display value and the consistent USD value for parent components
+   * 4. Validating user balance when appropriate
+   * 
+   * We chose not to use useEffect here because the transformation and validation
+   * need to happen immediately on input, not after a render cycle. This creates
+   * a more responsive user experience with no visible input lag.
+   */
   const handleInputChange = (newValue: string) => {
     // Limit USD input to 2 decimal places
     if (inputMode === "usd" && newValue.includes(".")) {
@@ -151,8 +241,6 @@ const TokenCard = ({
 
     // Only allow numbers and decimals
     if (newValue === "" || /^[0-9]*\.?[0-9]*$/.test(newValue)) {
-      setInputValue(newValue)
-
       if (inputMode === "token" && token) {
         // Convert token amount to USD for parent component
         try {
@@ -182,30 +270,14 @@ const TokenCard = ({
     }
   }
 
-  // Update getSecondaryValue to use token-specific decimals
-  const getSecondaryValue = () => {
-    if (!token || !inputValue) return ""
-
-    try {
-      if (inputMode === "token") {
-        // Show USD value when in token mode, rounded up to nearest penny
-        const tokenAmount = parseFloat(inputValue)
-        if (isNaN(tokenAmount)) return ""
-        return `≈ $${(Math.ceil(tokenAmount * token.price * 100) / 100).toFixed(2)}`
-      } else if (inputMode === "usd") {
-        // Show token amount when in USD mode
-        const usdAmount = parseFloat(inputValue)
-        if (isNaN(usdAmount) || token.price <= 0) return ""
-        return `≈ ${(usdAmount / token.price).toFixed(getTokenDecimals())} ${token.symbol}`
-      }
-      return ""
-    } catch (error) {
-      console.error("Error calculating secondary value:", error)
-      return ""
-    }
-  }
-
-  // Update toggleInputMode to use token-specific decimals and round up USD
+  /**
+   * Toggle between USD and token input modes.
+   * 
+   * This function handles the conversion between modes and ensures that
+   * the parent component always receives values in USD format regardless
+   * of the current display mode. This creates a consistent API for parent
+   * components while allowing flexible display options.
+   */
   const toggleInputMode = () => {
     if (inputMode === "token") {
       // Switching from token to USD mode
@@ -213,29 +285,31 @@ const TokenCard = ({
       if (currentToken && inputValue) {
         const tokenAmount = parseFloat(inputValue)
         if (!isNaN(tokenAmount)) {
-          // Update local input with USD value, rounded up to nearest penny
-          setInputValue(
-            (Math.ceil(tokenAmount * currentToken.price * 100) / 100).toFixed(
-              2,
-            ),
-          )
+          // Convert token to USD value for parent
+          const usdValue = (Math.ceil(tokenAmount * currentToken.price * 100) / 100).toFixed(2)
+          onChange(usdValue, true)
         }
       }
     } else {
       // Switching from USD to token mode
       setInputMode("token")
-      if (currentToken && inputValue) {
-        const usdAmount = parseFloat(inputValue)
+      if (currentToken && value) {
+        const usdAmount = parseFloat(value)
         if (!isNaN(usdAmount)) {
-          // Update local input with token value using token-specific decimals
-          setInputValue(
-            (usdAmount / currentToken.price).toFixed(getTokenDecimals()),
-          )
+          // The actual input value will be derived in the useMemo above
+          // Keep the USD value in parent component
+          onChange(value, true)
         }
       }
     }
   }
 
+  /**
+   * Get formatted token balance string for display.
+   * 
+   * This helper function centralizes the formatting logic for token balances,
+   * making it easier to maintain consistent formatting throughout the component.
+   */
   const getTokenBalance = () => {
     if (!token || !wallet) return `0.00 ${token?.symbol || ""}`
 
@@ -356,7 +430,7 @@ const TokenCard = ({
               <ArrowDownUp className="w-3 h-3 text-primary" />
             </button>
             <div className="text-sm text-primary/80 font-medium">
-              {getSecondaryValue() ||
+              {secondaryValue ||
                 `≈ 0 ${inputMode === "token" ? "USD" : token?.symbol || ""}`}
             </div>
           </div>

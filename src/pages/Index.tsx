@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Toaster } from "sonner";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import TokenCard from "@/components/TokenCard";
@@ -10,44 +10,44 @@ import { convertTokenValueToUsd} from "@/utils/conversion";
 
 const Index = () => {
   // Local state for tokens and their USD values.
-  const [sourceToken, setSourceToken] = useState<TokenInfo | null>(null);
-  const [targetToken, setTargetToken] = useState<TokenInfo | null>(null);
   const [sourceValue, setSourceValue] = useState<string>("");
-  const [targetValue, setTargetValue] = useState<string>("");
   const [isSelectingSource, setIsSelectingSource] = useState<boolean>(false);
   const [isSelectingTarget, setIsSelectingTarget] = useState<boolean>(false);
 
+  // Helper functions to find default tokens
+  const getDefaultSourceToken = (tokenList: TokenInfo[]) =>
+      tokenList.find((t) => t.symbol === "USDC") || tokenList[0] || null;
+
+  const getDefaultTargetToken = (tokenList: TokenInfo[]) =>
+      tokenList.find((t) => t.symbol === "ETH") ||
+      (tokenList.length > 1 ? tokenList[1] : null);
+
+  // Fetch tokens
   const { data: tokens = [] } = useAllTokens();
 
-  // Sync USD values from source input when tokens change
-  useEffect(() => {
+  // Instead of using useState + useEffect for initialization and updates,
+  // use a useMemo pattern by defining derived state directly
+  const defaultSourceToken = tokens.length > 0 ? getDefaultSourceToken(tokens) : null;
+  const defaultTargetToken = tokens.length > 0 ? getDefaultTargetToken(tokens) : null;
+
+  // State with proper initialization using lazy initializer
+  const [sourceToken, setSourceToken] = useState<TokenInfo | null>(() => defaultSourceToken);
+  const [targetToken, setTargetToken] = useState<TokenInfo | null>(() => defaultTargetToken);
+
+  // Calculate target value directly as derived state (no useEffect needed)
+  const calculateTargetValue = () => {
     if (sourceToken && targetToken && sourceValue) {
       try {
         const sourceUsdAmount = parseFloat(sourceValue);
         if (!isNaN(sourceUsdAmount)) {
-          // For now, we mirror the source USD amount as a starting point.
-          setTargetValue(sourceUsdAmount.toString());
+          return sourceUsdAmount.toString();
         }
       } catch (error) {
         console.error("Error calculating swap:", error);
       }
-    } else {
-      setTargetValue("");
     }
-  }, [sourceValue, sourceToken, targetToken]);
-
-  // Set default tokens on load.
-  useEffect(() => {
-    if (tokens.length > 0 && !sourceToken && !targetToken) {
-      // Default to USDC as source and ETH as target if available
-      const defaultSource = tokens.find((t) => t.symbol === "USDC") || tokens[0];
-      const defaultTarget =
-          tokens.find((t) => t.symbol === "ETH") || (tokens.length > 1 ? tokens[1] : null);
-
-      if (defaultSource) setSourceToken(defaultSource);
-      if (defaultTarget) setTargetToken(defaultTarget);
-    }
-  }, [tokens, sourceToken, targetToken]);
+    return "";
+  };
 
   // Trigger modal selection for tokens
   const handleSourceTokenSelect = () => setIsSelectingSource(true);
@@ -106,12 +106,10 @@ const Index = () => {
   const handleTargetValueChange = (newValue: string, isUsdValue: boolean) => {
     if (isUsdValue) {
       // Maintain synchronization between source and target when directly updating in USD.
-      setTargetValue(newValue);
       setSourceValue(newValue);
     } else if (targetToken) {
       try {
         const usdValue = convertTokenValueToUsd(newValue, targetToken.price);
-        setTargetValue(usdValue);
         setSourceValue(usdValue);
       } catch (error) {
         console.error("Error converting target value:", error);
@@ -119,10 +117,10 @@ const Index = () => {
     }
   };
 
-    /**
-     * Handles updates to the source token price.
-     * This is useful for updating the token's price in the UI when it changes.
-     */
+  /**
+   * Handles updates to the source token price.
+   * This is useful for updating the token's price in the UI when it changes.
+   */
   const handleSourcePriceUpdate = (updatedToken: TokenInfo) => {
     setSourceToken(updatedToken);
   };
@@ -131,19 +129,30 @@ const Index = () => {
     setTargetToken(updatedToken);
   };
 
-  return (
-    <div className="flex flex-col items-center justify-center p-4 pt-16 animate-fade-in h-full">
-      <Toaster position="top-center" />
+  // If no tokens are selected but defaults are available, set them
+  if (tokens.length > 0 && !sourceToken && defaultSourceToken) {
+    setSourceToken(defaultSourceToken);
+  }
 
-      <div className="w-full max-w-3xl lg:max-w-5xl mx-auto">
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent pb-2 drop-shadow-sm">
-            Token Price Explorer
-          </h1>
-          <p className="text-foreground/90 font-medium">
-            Compare token values and explore potential swaps
-          </p>
-        </div>
+  if (tokens.length > 0 && !targetToken && defaultTargetToken) {
+    setTargetToken(defaultTargetToken);
+  }
+
+  const targetValue = calculateTargetValue();
+
+  return (
+      <div className="flex flex-col items-center justify-center p-4 pt-16 animate-fade-in h-full">
+        <Toaster position="top-center" />
+
+        <div className="w-full max-w-3xl lg:max-w-5xl mx-auto">
+          <div className="mb-8 text-center">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent pb-2 drop-shadow-sm">
+              Token Price Explorer
+            </h1>
+            <p className="text-foreground/90 font-medium">
+              Compare token values and explore potential swaps
+            </p>
+          </div>
 
           <div className="theme-card rounded-xl p-6 transition-all duration-300">
             {/* Token buttons for quick selections (up to 4) */}
