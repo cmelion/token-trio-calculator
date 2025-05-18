@@ -473,8 +473,19 @@ When("I select the {string} wallet provider", async ({ page }: World, providerNa
   await expect(walletButton).toBeVisible();
   await walletButton.click();
 
-  // Wait for the dialog to close and connection to complete
-  await page.waitForTimeout(500);
+  // Look for the green success indicator
+  const connectedIndicator = page.locator('.bg-green-500');
+  await expect(connectedIndicator).toBeVisible({ timeout: 2000 });
+
+  // Look for the toast container and verify its child elements
+  const toast = page.locator('li[role="status"]').filter({ has: page.getByText('Wallet Connected') });
+  await expect(toast).toBeVisible({ timeout: 2000 });
+
+  // Dismiss the toast explicitly
+  const dismissButton = toast.getByRole('button', { name: /close|dismiss/i });
+  if (await dismissButton.isVisible())
+    await dismissButton.click();
+
 });
 
 Then("the wallet should be connected", async ({ page }: World) => {
@@ -502,10 +513,9 @@ Then("I should see the token balances displayed on the token cards", async ({ pa
 });
 
 Then("I should see a balance warning if the amount exceeds my balance", async ({ page }: World) => {
-  // Wait for the toast to appear and filter for the correct element
-  const toast = page.locator('span[role="status"]', { hasText: /Your .* balance .* is less than the amount you're trying to spend/ });
-  await expect(toast).toBeVisible({ timeout: 2000 });
-
-  // Verify the toast content
-  await expect(toast).toHaveText(/Your .* balance .* is less than the amount you're trying to spend/);
+  // Look for the toast container and check its child elements
+  const toast = page.locator('li[role="status"]').filter({
+    has: page.getByText(/Your .* balance .* is less than the amount you're trying to spend/)
+  });
+  await expect(toast).toBeVisible({ timeout: 5000 });
 });

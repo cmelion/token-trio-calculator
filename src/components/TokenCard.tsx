@@ -105,7 +105,7 @@ const TokenCard = ({
   // State for tracking whether the user is inputting in token units or USD
   const [inputMode, setInputMode] = useState<"token" | "usd">("usd")
   const { wallet } = useWallet()
-  const { toast } = useToast()
+  const { toast, dismiss } = useToast()
   // Track last warning time to prevent spamming the user with balance warnings
   const [lastWarningTime, setLastWarningTime] = useState(0)
 
@@ -157,13 +157,6 @@ const TokenCard = ({
     }
   }, [token, inputValue, inputMode, getTokenDecimals])
 
-  /**
-   * Validate if the user has sufficient balance for the entered amount.
-   * 
-   * Using useCallback here ensures that this function doesn't get recreated
-   * on every render, which would cause unnecessary re-renders of child components
-   * if this function were passed as a prop.
-   */
   const validateBalance = useCallback(
     (enteredValue: string) => {
       if (!token || !wallet) return
@@ -195,17 +188,23 @@ const TokenCard = ({
           tokenAmount > userBalance
         ) {
           setLastWarningTime(now)
+          
+          // Dismiss all existing toasts
+          dismiss()
+          
+          // Then show the new toast
           toast({
             title: "Insufficient balance",
             description: `Your ${token.symbol} balance (${userBalance.toFixed(6)}) is less than the amount you're trying to spend (${tokenAmount.toFixed(6)})`,
             variant: "destructive",
+            duration: 10000,
           })
         }
       } catch (error) {
         console.error("Error validating balance:", error)
       }
     },
-    [token, wallet, lastWarningTime, setLastWarningTime, toast, inputMode],
+    [token, wallet, lastWarningTime, setLastWarningTime, toast, inputMode, dismiss],
   )
 
   /**
