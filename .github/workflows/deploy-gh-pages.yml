@@ -46,6 +46,16 @@ jobs:
       - name: Copy MSW service worker
         run: cp public/mockServiceWorker.js dist/mockServiceWorker.js
 
+      - name: Run BDD tests
+        run: npm run test:bdd:ci
+
+      - name: Copy BDD test reports to dist
+        run: |
+          mkdir -p dist/bdd-reports
+          cp -R playwright-report/. dist/bdd-reports/
+          file_count=$(find dist/bdd-reports -type f | wc -l)
+          echo "Copied $file_count BDD test report files to dist/bdd-reports/"
+
       # Add component test coverage
       - name: Run component tests with coverage
         run: npm run test:components:coverage
@@ -57,16 +67,6 @@ jobs:
           cp -R coverage/. dist/coverage/
           file_count=$(find dist/coverage -type f | wc -l)
           echo "Copied $file_count component coverage report files to dist/coverage/"
-
-      - name: Run BDD tests
-        run: npm run test:bdd:ci
-
-      - name: Copy BDD test reports to dist
-        run: |
-          mkdir -p dist/bdd-reports
-          cp -R playwright-report/. dist/bdd-reports/
-          file_count=$(find dist/bdd-reports -type f | wc -l)
-          echo "Copied $file_count BDD test report files to dist/bdd-reports/"
 
       - name: Build Storybook
         run: npm run build-storybook
