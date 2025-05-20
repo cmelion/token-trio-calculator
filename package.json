@@ -14,7 +14,7 @@
     "test:bdd": "npx bddgen && npx playwright test",
     "test:bdd:generate": "npx bddgen",
     "test:bdd:run": "npx playwright test",
-    "test:bdd:playwright:ci": "npx playwright test --workers=2 --reporter=github --forbid-only --retries=1",
+    "test:bdd:playwright:ci": "npx playwright test --workers=2 --forbid-only --retries=1",
     "test:bdd:ci": "npm run test:bdd:generate && start-server-and-test \"storybook dev -p 6006 --ci --quiet --no-open\" http://localhost:6006 test:bdd:playwright:ci",
     "test:bdd:ui": "npx playwright test --ui",
     "test:bdd:debug": "npx playwright test --debug",
