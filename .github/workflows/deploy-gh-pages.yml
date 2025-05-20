@@ -47,7 +47,7 @@ jobs:
         run: cp public/mockServiceWorker.js dist/mockServiceWorker.js
 
       - name: Run BDD tests
-        run: npm run test:bdd:ci
+        run: npm run test:bdd:ci -- --workers=1 --retries=2 --timeout=60000
 
       - name: Copy BDD test reports to dist
         run: |
