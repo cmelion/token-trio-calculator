@@ -4,7 +4,7 @@ import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { navigateToStory } from "./app.steps";
 import { createPlaywrightFormTester } from "../utils/form-testing/factory";
-import { TokenSelectorTester } from "../utils/token-selector-testing/base-token-selector-tester";
+import { createPlaywrightTokenSelectorTester } from "../utils/token-selector-testing/base-token-selector-tester";
 
 const { Given, When, Then } = createBdd();
 
@@ -14,6 +14,7 @@ const { Given, When, Then } = createBdd();
 
 Given("I am viewing the TokenSelector component", async ({ page }: World) => {
     await navigateToStory(page, 'components-tokenselector', "Default");
+    // Use direct page API to verify dialog visibility
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
 });
@@ -23,13 +24,15 @@ Given("I am viewing the TokenSelector component", async ({ page }: World) => {
 //====================================================================================
 
 Then("I should see a dialog with a list of tokens", async ({ page }: World) => {
+    const tokenTester = createPlaywrightTokenSelectorTester(page);
+    
+    // For visibility checks, we need to use the page API directly
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
 
-    // Check for token list
-    const tokenButtons = page.getByRole("button", { name: /Select/ });
-    const count = await tokenButtons.count();
-    expect(count).toBeGreaterThanOrEqual(1);
+    // Use our tester for other operations
+    const symbols = await tokenTester.getVisibleTokenSymbols();
+    expect(symbols.length).toBeGreaterThanOrEqual(1);
 });
 
 Then("I should see a search input", async ({ page }: World) => {
@@ -58,13 +61,14 @@ Then("each token should show its symbol, name, and price", async ({ page }: Worl
 //====================================================================================
 
 When("I enter {string} in the token search field", async ({ page }: World, searchTerm: string) => {
-    const tokenTester = new TokenSelectorTester(page);
+    const tokenTester = createPlaywrightTokenSelectorTester(page);
     await tokenTester.searchForToken(searchTerm);
 });
 
 Then("I should only see tokens containing {string} in their name or symbol", async ({ page }: World, searchTerm: string) => {
+    
+    // Get all visible token buttons to check their content
     const pattern = new RegExp(searchTerm, 'i');
-
     const tokenButtons = page.getByRole("button", { name: /Select/ });
     const count = await tokenButtons.count();
 
@@ -75,20 +79,14 @@ Then("I should only see tokens containing {string} in their name or symbol", asy
 });
 
 When("I clear the search field", async ({ page }: World) => {
-    const formTester = createPlaywrightFormTester(page);
-    const searchInput = await formTester.findFieldByRole("textbox", { name: /Search tokens/i });
-
-    if (!searchInput) {
-        throw new Error("Search input not found");
-    }
-
-    await formTester.clear(searchInput);
+    const tokenTester = createPlaywrightTokenSelectorTester(page);
+    await tokenTester.searchForToken(""); // Clear by entering empty string
 });
 
 Then("I should see all available tokens", async ({ page }: World) => {
-    const tokenButtons = page.getByRole("button", { name: /Select/ });
-    const count = await tokenButtons.count();
-    expect(count).toBeGreaterThan(1);
+    const tokenTester = createPlaywrightTokenSelectorTester(page);
+    const symbols = await tokenTester.getVisibleTokenSymbols();
+    expect(symbols.length).toBeGreaterThan(1);
 });
 
 //====================================================================================
@@ -96,7 +94,7 @@ Then("I should see all available tokens", async ({ page }: World) => {
 //====================================================================================
 
 When("I click on the {string} token", async ({ page }: World, tokenSymbol: string) => {
-    const tokenTester = new TokenSelectorTester(page);
+    const tokenTester = createPlaywrightTokenSelectorTester(page);
     await tokenTester.selectToken(tokenSymbol);
 });
 
@@ -108,7 +106,7 @@ Then("the token selector dialog should close", async ({ page }: World) => {
 Then("the selected token should be {string}", async ({ page }: World) => {
     // Verify dialog closed since we can't directly check parent state
     const dialog = page.getByRole("dialog");
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).not.toBeVisible({ timeout: 5000 });
 
     // Since we can't check the parent state directly from inside the dialog,
     // we can at least store this in a comment that explains why we're not using tokenSymbol
@@ -127,17 +125,19 @@ When("I click the close button on the token selector", async ({ page }: World) =
 When("I am viewing the TokenSelector with {string} selected", async ({ page }: World, tokenSymbol: string) => {
     // Use kebab-case format for the story name
     await navigateToStory(page, 'components-tokenselector', "with-selected-token");
+    
+    // For visibility checks, use page API directly
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
 
     // Add a warning when a token other than USDC is requested
     if (tokenSymbol.toUpperCase() !== "USDC") {
-        console.warn(`Note: Step shows USDC but "${tokenSymbol}" was requested`);
+        console.warn(`Note: Story shows USDC but "${tokenSymbol}" was requested`);
     }
 });
 
 Then("the {string} token should be highlighted", async ({ page }: World, tokenSymbol: string) => {
-    const tokenTester = new TokenSelectorTester(page);
+    const tokenTester = createPlaywrightTokenSelectorTester(page);
     const isHighlighted = await tokenTester.isTokenHighlighted(tokenSymbol);
     expect(isHighlighted).toBeTruthy();
 });

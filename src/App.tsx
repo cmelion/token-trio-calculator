@@ -2,7 +2,7 @@
 import { useRoutes } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/layout/site-header.tsx";
 
 // Define routes configuration
 const routes = [

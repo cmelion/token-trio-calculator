@@ -116,7 +116,7 @@ export async function fetchTokenInfo(symbol: string, chainId: string): Promise<T
       return null;
     }
 
-    console.log('Token data for debugging:', tokenData);
+   //  console.log('Token data for debugging:', tokenData);
 
     const priceData = await getAssetPriceInfo({
       chainId,
@@ -124,7 +124,7 @@ export async function fetchTokenInfo(symbol: string, chainId: string): Promise<T
       apiKey: API_KEY,
     }) as PriceApiResponse;
 
-    console.log('Price data for debugging:', priceData);
+    // console.log('Price data for debugging:', priceData);
 
     // Only use the API price, with fallback to 1 if no price is available
     const tokenPrice = priceData?.unitPrice || priceData?.usdPrice || priceData?.price || 1;

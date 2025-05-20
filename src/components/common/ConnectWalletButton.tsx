@@ -1,14 +1,14 @@
 // src/components/ConnectWalletButton.tsx
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button.tsx";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Icons } from "@/components/icons";
+} from "@/components/ui/dialog.tsx";
+import { Icons } from "@/components/common/icons.tsx";
 import { useWallet } from "@/components/providers/wallet";
 
 // Use the exact union type expected by the connect function
@@ -38,7 +38,11 @@ export function ConnectWalletButton() {
       >
         {wallet ? (
           <>
-            <span className="w-2 h-2 rounded-full bg-green-500 mr-2" aria-hidden="true" />
+            <span
+              className="w-2 h-2 rounded-full bg-green-500 mr-2"
+              aria-label="Wallet connection status indicator"
+              aria-hidden="true"
+            />
             <span>{wallet.option.name.split(" ")[0]}</span>
           </>
         ) : (

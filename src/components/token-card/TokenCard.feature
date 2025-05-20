@@ -1,4 +1,4 @@
-@storybook-running
+@storybook-running @component
 Feature: Token Card Input and Display
   As a user of the crypto swap interface
   I want to input amounts in either USD or token values

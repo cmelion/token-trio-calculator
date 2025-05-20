@@ -2,14 +2,42 @@ import { http, passthrough, HttpResponse, delay } from 'msw'
 import { supportedTokens } from '@/lib/api'
 
 /**
- * Helper function to determine if we are running inside Storybook.
- * This allows us to only mock API responses in Storybook, while passing through
- * to the real API in all other environments (e.g., development, production).
- *
- * We check for both STORYBOOK and VITE_STORYBOOK environment variables for compatibility.
+ * Determines whether to use mock API responses or pass through to real API.
+ * Returns true if mocks should be used, false if passthrough should be used.
  */
-const isStorybook = () =>
-    import.meta.env.STORYBOOK === 'true' || import.meta.env.VITE_STORYBOOK === 'true'
+const shouldUseMocks = () => {
+  // Log current detection state for debugging
+  // console.log('Environment detection:', {
+  //   STORYBOOK: import.meta.env.STORYBOOK,
+  //   VITE_STORYBOOK: import.meta.env.VITE_STORYBOOK,
+  //   VITE_ENABLE_MSW: import.meta.env.VITE_ENABLE_MSW,
+  //   VITE_API_KEY: import.meta.env.VITE_API_KEY ? 'present' : 'missing',
+  //   NODE_ENV: import.meta.env.NODE_ENV,
+  //   MODE: import.meta.env.MODE,
+  //   TEST: import.meta.env.TEST || import.meta.env.VITEST
+  // });
+
+  // Always use mocks in test environment
+  const isTestEnvironment =
+    import.meta.env.TEST === 'true' ||
+    import.meta.env.VITEST === 'true' ||
+    import.meta.env.NODE_ENV === 'test';
+
+  if (isTestEnvironment) return true;
+
+  // Check for Storybook environment
+  const isStorybookEnvironment =
+    import.meta.env.STORYBOOK === 'true' ||
+    import.meta.env.VITE_STORYBOOK === 'true';
+
+  // In storybook, use mocks only if MSW is enabled
+  if (isStorybookEnvironment) {
+    return import.meta.env.VITE_ENABLE_MSW === 'true';
+  }
+
+  // In production, use passthrough if API key is available
+  return !import.meta.env.VITE_API_KEY;
+}
 
 /**
  * Static token info for supported tokens.
@@ -119,7 +147,7 @@ export const handlers = [
      * Otherwise, passes through to the real API.
      */
     http.get('https://api.fun.xyz/v1/asset/erc20/:chainId/:symbol', async ({ params }) => {
-        if (!isStorybook()) return passthrough()
+        if (!shouldUseMocks()) return passthrough()
         const { symbol } = params
         const info = staticTokenInfo[symbol as keyof typeof staticTokenInfo]
         if (!info) return HttpResponse.json({}, { status: 404 })
@@ -134,7 +162,7 @@ export const handlers = [
      * Otherwise, passes through to the real API.
      */
     http.get('https://api.fun.xyz/v1/asset/erc20/price/:chainId/:address', async ({ params }) => {
-        if (!isStorybook()) return passthrough()
+        if (!shouldUseMocks()) return passthrough()
         const { address } = params
         // Find the symbol for the given address
         const symbol = Object.keys(staticTokenInfo).find(

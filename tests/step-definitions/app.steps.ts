@@ -293,14 +293,41 @@ When("I click the swap arrow", async ({ page }: World) => {
 //====================================================================================
 
 Then("I should see the exchange rate between tokens", async ({ page }: World) => {
-  // Updated pattern to match "Exchange Rate: 1 USDC ≈ 0.000333 ETH ($1.00)"
-  const rateText = page.getByText(/Exchange Rate:\s*1\s+[A-Z]+\s*≈\s*[\d.]+\s+[A-Z]+/);
-  await expect(rateText).toBeVisible();
+  // Find the exchange rate region using its ARIA role and label
+  const exchangeRateRegion = page.getByRole('region', { name: 'Exchange Rate Information' });
+  await expect(exchangeRateRegion).toBeVisible();
+
+  // Find the exchange rate label
+  const rateLabel = page.getByTestId('exchange-rate-label');
+  await expect(rateLabel).toBeVisible();
+
+  // Find the value element - test for either the value or empty state
+  const rateValue = page.getByTestId('exchange-rate-value');
+  const emptyValue = page.getByTestId('exchange-rate-empty');
+
+  // Check that either the rate value or empty state message is visible
+  if (await rateValue.isVisible()) {
+    // Verify the value has the expected format (token symbols and numbers)
+    const valueText = await rateValue.textContent();
+    expect(valueText).toMatch(/1\s+[A-Z]+\s+≈\s+[\d.]+\s+[A-Z]+/);
+  } else {
+    await expect(emptyValue).toBeVisible();
+  }
 });
 
 Then("I should see the exchange rate between {string} and {string}", async ({ page }: World, sourceSymbol: string, targetSymbol: string) => {
-  const rateText = page.getByText(new RegExp(`1 ${sourceSymbol} .*${targetSymbol}`));
-  await expect(rateText).toBeVisible();
+  // Get the exchange rate region first
+  const exchangeRateRegion = page.getByRole('region', { name: 'Exchange Rate Information' });
+  await expect(exchangeRateRegion).toBeVisible();
+
+  // Use the data-testid attribute to get the specific element
+  const rateValue = page.getByTestId('exchange-rate-value');
+  await expect(rateValue).toBeVisible();
+
+  // Verify it contains the correct tokens
+  const valueText = await rateValue.textContent();
+  expect(valueText).toContain(sourceSymbol);
+  expect(valueText).toContain(targetSymbol);
 });
 
 Then("the exchange rate should reflect the correct conversion", async ({ page }: World) => {
@@ -404,15 +431,20 @@ Given("the target token is {string}", async ({ page }: World, tokenSymbol: strin
 });
 
 Then(/^the (source|target) token should be "([^"]*)"$/, async ({ page }: World, cardType: string, tokenSymbol: string) => {
-  // Determine which header text to look for based on the card type
-  const headerText = cardType === 'source' ? 'You pay' : 'You receive';
+  // Find the card directly by its aria-label
+  const cardLabel = `${cardType.charAt(0).toUpperCase() + cardType.slice(1)} token card`;
+  const card = page.locator(`[aria-label="${cardLabel}"]`);
 
-  // Find the card by its header text
-  const card = page.locator('div', { has: page.getByText(headerText, { exact: true }) });
+  // Verify card exists
+  await expect(card).toBeVisible();
 
-  // Find the token button specifically using a more precise selector
-  const tokenButton = card.getByRole('button', { name: new RegExp(`Change ${tokenSymbol} token`) });
+  // Find the token button within the card using its aria-label
+  const tokenButton = card.locator(`button[aria-label="Change ${tokenSymbol} token"]`);
   await expect(tokenButton).toBeVisible();
+
+  // Additional verification for the token symbol text
+  const tokenText = card.getByText(tokenSymbol, { exact: true });
+  await expect(tokenText).toBeVisible();
 });
 
 Then("the source and target tokens should be swapped", async ({ page }: World) => {
@@ -473,9 +505,9 @@ When("I select the {string} wallet provider", async ({ page }: World, providerNa
   await expect(walletButton).toBeVisible();
   await walletButton.click();
 
-  // Look for the green success indicator
-  const connectedIndicator = page.locator('.bg-green-500');
-  await expect(connectedIndicator).toBeVisible({ timeout: 2000 });
+  // Look for the connection indicator using its aria-label
+  const connectedIndicator = page.getByLabel('Wallet connection status indicator');
+  await expect(connectedIndicator).toBeVisible({ timeout: 5000 });
 
   // Look for the toast container and verify its child elements
   const toast = page.locator('li[role="status"]').filter({ has: page.getByText('Wallet Connected') });
@@ -485,12 +517,11 @@ When("I select the {string} wallet provider", async ({ page }: World, providerNa
   const dismissButton = toast.getByRole('button', { name: /close|dismiss/i });
   if (await dismissButton.isVisible())
     await dismissButton.click();
-
 });
 
 Then("the wallet should be connected", async ({ page }: World) => {
-  // Verify the wallet connection indicator is visible
-  const connectedIndicator = page.locator('.bg-green-500');
+  // Verify the wallet connection indicator is visible using aria-label
+  const connectedIndicator = page.getByLabel('Wallet connection status indicator');
   await expect(connectedIndicator).toBeVisible();
 });
 

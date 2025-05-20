@@ -1,10 +1,10 @@
 
-import { MainNav } from "@/components/main-nav"
-import { ThemeToggle } from "@/components/providers/theme/"
-import { siteConfig } from "@/config/site"
+import { MainNav } from "@/components/layout/main-nav.tsx"
+import { ThemeToggle } from "@/components/providers/theme"
+import { siteConfig } from "@/config/site.ts"
 import { GithubIcon } from "lucide-react"
-import { Icons } from "@/components/icons"
-import { ConnectWalletButton } from "@/components/ConnectWalletButton"
+import { Icons } from "@/components/common/icons.tsx"
+import { ConnectWalletButton } from "@/components/common/ConnectWalletButton.tsx"
 
 export function SiteHeader() {
   return (

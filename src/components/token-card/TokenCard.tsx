@@ -2,11 +2,11 @@
 import { ArrowDownUp, DollarSign } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useWallet } from "@/components/providers/wallet";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { useTokenInfo } from "@/hooks/use-tokens";
-import { TokenInfo } from "@/lib/api";
+import { Card, CardContent } from "@/components/ui/card.tsx";
+import { Input } from "@/components/ui/input.tsx";
+import { useToast } from "@/components/ui/use-toast.ts";
+import { useTokenInfo } from "@/hooks/use-tokens.ts";
+import { TokenInfo } from "@/lib/api.ts";
 
 /**
  * TokenCard Component
@@ -321,9 +321,12 @@ const TokenCard = ({
   }
 
   return (
-    <Card className="w-full md:w-[400px] lg:w-[450px] h-[187px] mx-auto shadow-xl border border-primary/30 bg-black/40 backdrop-blur-md hover:shadow-primary/10 hover:border-primary/50 transition-all duration-200">
+    <Card
+      className="w-full md:w-[400px] lg:w-[450px] h-[187px] mx-auto shadow-xl border border-primary/30 bg-black/40 backdrop-blur-md hover:shadow-primary/10 hover:border-primary/50 transition-all duration-200"
+      aria-label={`${isSource ? "Source" :"Target"} token card`}
+    >
       <CardContent className="flex flex-col h-full p-3">
-        <div className="flex justify-between mb-1">
+        <div className="flex justify-between mb-1" aria-label="card-header">
           <span className="text-sm font-medium text-white">
             {isSource ? "You pay" : "You receive"}
           </span>
@@ -428,7 +431,10 @@ const TokenCard = ({
             >
               <ArrowDownUp className="w-3 h-3 text-primary" />
             </button>
-            <div className="text-sm text-primary/80 font-medium">
+            <div
+              className="text-sm text-primary/80 font-medium"
+              aria-label={`Secondary value in ${inputMode === "token" ? "USD" : token?.symbol || "token"} for ${isSource ? "source" : "target"} amount`}
+            >
               {secondaryValue ||
                 `≈ 0 ${inputMode === "token" ? "USD" : token?.symbol || ""}`}
             </div>

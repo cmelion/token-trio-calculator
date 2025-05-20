@@ -1,5 +1,5 @@
-# src/components/TokenSelector.feature
-@storybook-running
+# src/components/token-selector/TokenSelector.feature
+@storybook-running @component
 Feature: Token Selector Dialog
   As a user of the crypto swap interface
   I want to search and select tokens from a list

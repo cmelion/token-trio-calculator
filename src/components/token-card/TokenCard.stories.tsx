@@ -1,8 +1,8 @@
 // src/components/TokenCard.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react';
-import { StorybookAppDecorator } from '../stories/decorators/AppDecorator';
-import { TokenInfo } from '@/lib/api';
-import TokenCard from './TokenCard';
+import { StorybookAppDecorator } from '../../stories/decorators/AppDecorator.tsx';
+import { TokenInfo } from '@/lib/api.ts';
+import TokenCard from './TokenCard.tsx';
 
 // Example token for demonstration
 const demoToken: TokenInfo = {

@@ -17,7 +17,12 @@
     "test:bdd:ci": "npm run test:bdd:generate && start-server-and-test storybook http://localhost:6006 test:bdd:run",
     "test:bdd:ui": "npx playwright test --ui",
     "test:bdd:debug": "npx playwright test --debug",
-    "test:bdd:watch": "chokidar \"src/**/*.steps.ts\" \"src/**/*.feature\" -c \"npm run test:bdd:generate\""
+    "test:bdd:watch": "chokidar \"src/**/*.steps.ts\" \"src/**/*.feature\" -c \"npm run test:bdd:generate\"",
+    "// Component Tests (Vitest)": "",
+    "test:components": "vitest run --project components -t @component",
+    "test:components:coverage": "vitest run --project components --coverage",
+    "test:components:scenario": "vitest run --project components --testNamePattern",
+    "test:components:watch": "vitest watch --project components"
   },
   "dependencies": {
     "@funkit/api-base": "^1.7.1",
@@ -111,7 +116,13 @@
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^5.4.1"
+    "vite": "^5.4.1",
+    "@testing-library/dom": "^10.4.0",
+    "@vitest/browser": "^3.1.1",
+    "@vitest/coverage-v8": "^3.1.1",
+    "@vitest/ui": "^3.1.1",
+    "jsdom": "^26.1.0",
+    "vitest": "^3.1.1"
   },
   "msw": {
     "workerDirectory": [

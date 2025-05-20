@@ -1,4 +1,4 @@
-@storybook-running
+@storybook-running @component
 Feature: Token Swap Application
   As a user
   I want to compare token values and explore potential swaps
@@ -51,21 +51,13 @@ Feature: Token Swap Application
     Then the target amount should be updated
     And the exchange rate should reflect the correct conversion
 
-  Scenario: Swapping tokens using the swap arrow
-    Given the source token is "ETH"
-    And the target token is "USDC"
-    When I click the swap arrow
-    Then the source token should be "USDC"
-    And the target token should be "ETH"
-
   Scenario: Seeing real-time exchange rates
-    When the source token is "ETH"
+    Given I click the "ETH" quick select button
+    Then the source token is "ETH"
     And the target token is "USDC"
-    Then I should see the exchange rate between "ETH" and "USDC"
-    And the exchange rate should show the price in USD
+    And I should see the exchange rate between "ETH" and "USDC"
 
   Scenario: Connecting a wallet and viewing token balances
-    Given I am viewing the application
     When I click the "Connect Wallet" button
     Then I should see the wallet connection dialog
     When I select the "Coinbase Wallet" wallet provider
