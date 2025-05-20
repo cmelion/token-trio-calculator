@@ -80,3 +80,5 @@ These should be iterated over for better code reuse.  See [RJSF/Tailwind tests](
 📚 **Interactive Storybook:** [View Component Library](https://cmelion.github.io/token-trio-calculator/storybook/)
 
 🧪 **BDD Test Results:** [View Test Reports](https://cmelion.github.io/token-trio-calculator/bdd-reports/)
+
+📊 **Component Coverage:** [View Coverage Reports](https://cmelion.github.io/token-trio-calculator/coverage/components/)
