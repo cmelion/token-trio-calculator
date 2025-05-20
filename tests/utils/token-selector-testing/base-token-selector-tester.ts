@@ -1,56 +1,53 @@
-import { ElementAdapter } from "../adapters/element-adapter";
-import { AbstractComponentTester, TestElement } from "../component-testing/base-component-tester";
+// tests/utils/token-selector-testing/base-token-selector-tester.ts
 import { Page } from "@playwright/test";
+import { AbstractComponentTester } from "../component-testing/base-component-tester";
 import { PlaywrightElementAdapter } from "../adapters/playwright-element-adapter";
-import { RTLElementAdapter } from "../adapters/rtl-element-adapter";
 
 export class TokenSelectorTester extends AbstractComponentTester {
-  constructor(adapter: ElementAdapter) {
-    super(adapter);
+  private page: Page;
+
+  constructor(page: Page) {
+    super(new PlaywrightElementAdapter(page));
+    this.page = page;
   }
 
   /**
    * Gets the token selector dialog element
    */
-  async getDialog(): Promise<TestElement> {
-    return this.adapter.findByRole(null, "dialog");
+  async getDialog() {
+    return this.page.getByRole("dialog");
   }
 
   /**
    * Searches for tokens using the search input
    */
   async searchForToken(searchTerm: string): Promise<void> {
-    const searchInput = await this.adapter.findByRole(null, "textbox", { name: /Search tokens/i });
-    await this.adapter.clear(searchInput);
-    await this.adapter.type(searchInput, searchTerm);
+    const searchInput = this.page.getByRole("textbox", { name: /Search tokens/i });
+    await searchInput.clear();
+    await searchInput.fill(searchTerm);
   }
 
   /**
    * Selects a token by its symbol
    */
   async selectToken(tokenSymbol: string): Promise<void> {
-    const tokenButton = await this.adapter.findByRole(null, "button", {
+    const tokenButton = this.page.getByRole("button", {
       name: new RegExp(`Select ${tokenSymbol}`, 'i')
     });
-    await this.adapter.click(tokenButton);
+    await tokenButton.click();
   }
 
   /**
    * Gets the list of visible token symbols
    */
   async getVisibleTokenSymbols(): Promise<string[]> {
-    // Get all token buttons (excluding the Close button)
-    const tokenButtons = await this.adapter.findAllByRole(null, "button", { name: /Select/ });
-    
+    const tokenButtons = this.page.getByRole("button", { name: /Select/ });
+    const count = await tokenButtons.count();
+
     const symbols: string[] = [];
-    for (const button of tokenButtons) {
-      // Find the symbol span directly by querying for the font-medium text element
-      // or extract from the button's aria-label which follows "Select SYMBOL - NAME" format
-      const buttonText = await this.adapter.getTextContent(button);
-      const ariaLabel = await this.adapter.getAttribute(button, "aria-label") || buttonText;
-      
-      // Extract from aria-label which has format "Select SYMBOL - NAME"
-      const match = ariaLabel.match(/Select\s+([A-Z0-9]+)\s*-/);
+    for (let i = 0; i < count; i++) {
+      const buttonText = await tokenButtons.nth(i).textContent() || "";
+      const match = buttonText.match(/Select (\w+)/);
       if (match && match[1]) {
         symbols.push(match[1]);
       }
@@ -63,25 +60,12 @@ export class TokenSelectorTester extends AbstractComponentTester {
    * Checks if a token is highlighted (selected)
    */
   async isTokenHighlighted(tokenSymbol: string): Promise<boolean> {
-    const tokenButton = await this.adapter.findByRole(null, "button", {
+    const tokenButton = this.page.getByRole("button", {
       name: new RegExp(`Select ${tokenSymbol}`, 'i')
     });
 
-    const className = await this.adapter.getAttribute(tokenButton, "class");
-    return className?.includes('bg-primary/30') || false;
+    return tokenButton.evaluate(el => {
+      return el.classList.contains('bg-primary/30');
+    });
   }
-}
-
-/**
- * Creates a TokenSelectorTester for Playwright
- */
-export function createPlaywrightTokenSelectorTester(page: Page): TokenSelectorTester {
-  return new TokenSelectorTester(new PlaywrightElementAdapter(page));
-}
-
-/**
- * Creates a TokenSelectorTester for React Testing Library
- */
-export function createRTLTokenSelectorTester(): TokenSelectorTester {
-  return new TokenSelectorTester(new RTLElementAdapter());
 }

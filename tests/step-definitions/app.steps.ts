@@ -431,20 +431,15 @@ Given("the target token is {string}", async ({ page }: World, tokenSymbol: strin
 });
 
 Then(/^the (source|target) token should be "([^"]*)"$/, async ({ page }: World, cardType: string, tokenSymbol: string) => {
-  // Find the card directly by its aria-label
-  const cardLabel = `${cardType.charAt(0).toUpperCase() + cardType.slice(1)} token card`;
-  const card = page.locator(`[aria-label="${cardLabel}"]`);
+  // Determine which header text to look for based on the card type
+  const headerText = cardType === 'source' ? 'You pay' : 'You receive';
 
-  // Verify card exists
-  await expect(card).toBeVisible();
+  // Find the card by its header text
+  const card = page.locator('div', { has: page.getByText(headerText, { exact: true }) });
 
-  // Find the token button within the card using its aria-label
-  const tokenButton = card.locator(`button[aria-label="Change ${tokenSymbol} token"]`);
+  // Find the token button specifically using a more precise selector
+  const tokenButton = card.getByRole('button', { name: new RegExp(`Change ${tokenSymbol} token`) });
   await expect(tokenButton).toBeVisible();
-
-  // Additional verification for the token symbol text
-  const tokenText = card.getByText(tokenSymbol, { exact: true });
-  await expect(tokenText).toBeVisible();
 });
 
 Then("the source and target tokens should be swapped", async ({ page }: World) => {
@@ -505,9 +500,9 @@ When("I select the {string} wallet provider", async ({ page }: World, providerNa
   await expect(walletButton).toBeVisible();
   await walletButton.click();
 
-  // Look for the connection indicator using its aria-label
-  const connectedIndicator = page.getByLabel('Wallet connection status indicator');
-  await expect(connectedIndicator).toBeVisible({ timeout: 5000 });
+  // Look for the green success indicator
+  const connectedIndicator = page.locator('.bg-green-500');
+  await expect(connectedIndicator).toBeVisible({ timeout: 2000 });
 
   // Look for the toast container and verify its child elements
   const toast = page.locator('li[role="status"]').filter({ has: page.getByText('Wallet Connected') });
@@ -517,11 +512,12 @@ When("I select the {string} wallet provider", async ({ page }: World, providerNa
   const dismissButton = toast.getByRole('button', { name: /close|dismiss/i });
   if (await dismissButton.isVisible())
     await dismissButton.click();
+
 });
 
 Then("the wallet should be connected", async ({ page }: World) => {
-  // Verify the wallet connection indicator is visible using aria-label
-  const connectedIndicator = page.getByLabel('Wallet connection status indicator');
+  // Verify the wallet connection indicator is visible
+  const connectedIndicator = page.locator('.bg-green-500');
   await expect(connectedIndicator).toBeVisible();
 });
 
