@@ -12,11 +12,12 @@ type TokenMetadataResponse = {
 
 type ErrorResponse = {
   error: string;
+  details?: string;
 };
 
 export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<TokenMetadataResponse | ErrorResponse>
+    req: NextApiRequest,
+    res: NextApiResponse<TokenMetadataResponse | ErrorResponse>
 ) {
   const { symbol, chainId } = req.query;
 
@@ -29,23 +30,43 @@ export default async function handler(
   }
 
   try {
+    // Log environment info to help debug (will appear in Vercel logs)
+    console.log(`Fetching token metadata for chain: ${chainIdStr}, symbol: ${symbolStr}`);
+
+    // Check if API key exists
+    const apiKey = process.env.VITE_API_KEY;
+    if (!apiKey) {
+      console.error('Missing API key in environment variables');
+      return res.status(500).json({
+        error: 'Server configuration error',
+        details: 'API key not found'
+      });
+    }
+
     const response = await fetch(
-      `https://api.fun.xyz/v1/asset/erc20/${chainIdStr}/${symbolStr}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.VITE_API_KEY}`,
-          'Content-Type': 'application/json'
+        `https://api.fun.xyz/v1/asset/erc20/${chainIdStr}/${symbolStr}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          }
         }
-      }
     );
 
     if (!response.ok) {
-      throw new Error(`API returned status ${response.status}`);
+      const errorText = await response.text().catch(() => 'No error details available');
+      console.error(`API error: ${response.status}`, errorText);
+
+      return res.status(response.status).json({
+        error: `API returned status ${response.status}`,
+        details: errorText
+      });
     }
 
     const data = await response.json();
     return res.status(200).json(data);
   } catch (error) {
+    console.error(`Error fetching token metadata:`, error);
     const errorMessage = error instanceof Error ? error.message : 'Failed to fetch token data';
     return res.status(500).json({ error: errorMessage });
   }
