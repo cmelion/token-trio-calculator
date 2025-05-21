@@ -7,7 +7,7 @@ type TokenMetadataResponse = {
   decimals: number;
   address: string;
   logoURI?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 type ErrorResponse = {
