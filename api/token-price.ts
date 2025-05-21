@@ -29,7 +29,7 @@ export default async function handler(
       `https://api.fun.xyz/v1/asset/erc20/price/${chainIdStr}/${addressStr}`,
       {
         headers: {
-          'Authorization': `Bearer ${process.env.API_KEY}`,
+          'Authorization': `Bearer ${process.env.VITE_API_KEY}`,
           'Content-Type': 'application/json'
         }
       }
