@@ -47,7 +47,7 @@ export default async function handler(
         `https://api.fun.xyz/v1/asset/erc20/${chainIdStr}/${symbolStr}`,
         {
           headers: {
-            'Authorization': `Bearer ${apiKey}`,
+            'x-api-key': apiKey,
             'Content-Type': 'application/json'
           }
         }
