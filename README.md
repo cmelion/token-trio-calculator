@@ -1,5 +1,14 @@
 # Welcome to our Fun Token Price Explorer project
 
+Follow us as we leverage modern tools to turn this:
+
+![Screenshot 2025-06-19 at 11 35 09 AM](https://github.com/user-attachments/assets/75653e7b-1e2f-4d4b-902c-4d65ddb772b5)
+
+Into this:
+
+![Screenshot 2025-06-19 at 11 38 30 AM](https://github.com/user-attachments/assets/716dbc8b-7c34-41a3-b197-2ce7da1973b1)
+
+
 ## What technologies are used for this project?
 
 This project is built with:
