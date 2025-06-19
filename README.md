@@ -19,7 +19,7 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-We(royal we) leaned heavily on a $25/month Lovable.dev subscription (17/100 monthly tokens used) to produce the initial design and layout given UX/Design is probably where we are weakest.
+We leaned heavily on a $25/month Lovable.dev subscription (17/100 monthly tokens used) to produce the initial design and layout given UX/Design is probably where we are weakest.
 Font Blindness is a thing 😆 — Interaction design **is** a core strength of the "team", but we are not designers. We are engineers.
 
 We also made extensive use of **Claude 3.7 Sonnet Thinking** with our $20/month Copilot subscription with Webstorm IDE integration.
